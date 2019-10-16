@@ -1,0 +1,1 @@
+This repository contains common Go data structures and algorithms shared across Lantern Go projects
