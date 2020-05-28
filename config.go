@@ -73,6 +73,9 @@ type ChainedServerInfo struct {
 	// TLSClientHelloID specifies with uTLS client hello to use.
 	TLSClientHelloID string
 
+	// TLSClientHelloSplitting specifies whether to split the ClientHello into multiple packets.
+	TLSClientHelloSplitting bool
+
 	// TLSClientSessionState is a serialized pre-negotiated TLS client session which can
 	// be used to connect to an HTTPS server using an abbreviated handshake.
 	TLSClientSessionState string
