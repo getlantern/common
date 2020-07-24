@@ -90,4 +90,11 @@ type ChainedServerInfo struct {
 	// MultiplexedPhysicalConns controls how many physical connections to use
 	// under the multiplexing. This defaults to 1.
 	MultiplexedPhysicalConns int
+
+	// MultiplexedProtocol controls what multiplexing protocol will
+	// be configured.
+	MultiplexedProtocol string
+
+	// MultiplexedSettings: Settings for multiplex protocol
+	MultiplexedSettings map[string]string
 }
