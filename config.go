@@ -83,6 +83,12 @@ type ChainedServerInfo struct {
 	// Location: the location where the server resides.
 	Location ServerLocation
 
+	// MultipathEndpoint: The host name to which this server eventually
+	// connects via multipath. Servers with the same MultipathEndpoint need to
+	// be bonded together to form a single dialer. Empty if the server does not
+	// support multipath.
+	MultipathEndpoint string
+
 	// MultiplexedAddr: a host:port at which this server is reachable using cmux-
 	// based multiplexing.
 	MultiplexedAddr string
