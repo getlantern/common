@@ -76,6 +76,10 @@ type ChainedServerInfo struct {
 	// TLSClientHelloSplitting specifies whether to split the ClientHello into multiple packets.
 	TLSClientHelloSplitting bool
 
+	// TLSClientHelloSplittingFragments specifies how many fragments to split client hellos into.
+	// If not specified, defaults to 20.
+	TLSClientHelloSplittingFragments int
+
 	// TLSClientSessionState is a serialized pre-negotiated TLS client session which can
 	// be used to connect to an HTTPS server using an abbreviated handshake.
 	TLSClientSessionState string
