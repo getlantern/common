@@ -104,3 +104,17 @@ type ChainedServerInfo struct {
 	// MultiplexedSettings: Settings for multiplex protocol
 	MultiplexedSettings map[string]string
 }
+
+type ReplicaInfo struct {
+	StorageProvider    string
+	Region             string
+	BucketName         string
+	SearchAPIHost      string
+	ThumbnailerAPIHost string
+	Trackers           []string
+}
+
+type UserConfig struct {
+	Proxies map[string]*ChainedServerInfo
+	Replica *ReplicaInfo
+}
