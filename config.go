@@ -104,3 +104,15 @@ type ChainedServerInfo struct {
 	// MultiplexedSettings: Settings for multiplex protocol
 	MultiplexedSettings map[string]string
 }
+
+// MarketShare is a value between 0 and 1 representing a browser's fraction of the global market.
+type MarketShare float64
+
+// BrowserType specifies a type of web browser.
+type BrowserType string
+
+// MarketShareData encapsulates market share information for a region.
+type MarketShareData map[BrowserType]MarketShare
+
+// CountryCode is a 2-letter ISO country code.
+type CountryCode string
