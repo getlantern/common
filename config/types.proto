@@ -36,3 +36,11 @@ message ProxyConfig {
     string track = 24;
     string region = 25;
 }
+
+message BypassRequest {
+    ProxyConfig config = 1;
+}
+
+message BypassResponse {
+    string random = 1;
+}
