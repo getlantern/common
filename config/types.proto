@@ -35,4 +35,18 @@ message ProxyConfig {
     map<string, string> multiplexed_settings = 23;
     string track = 24;
     string region = 25;
+    /* Prefixes to choose from.
+     * 
+     * If prefixes is not empty, the connection will multipath
+     * over all prefixes. That means if you have 10 prefixes, 10
+     * connections will launch and the fastest successful connection
+     * will be used and the rest will be discarded (or logged if a callback is
+     * specified).
+     * Example prefix: `62756e6e79666f6f666f6f`
+     *
+     * Easy way to make a string into a hex string:
+     *
+     *     $ echo -n "bunnyfoofoo" | xxd -p
+     */
+    repeated string prefixes = 26;
 }
