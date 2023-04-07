@@ -35,5 +35,5 @@ message ProxyConfig {
     map<string, string> multiplexed_settings = 23;
     string track = 24;
     string region = 25;
-    bool no_supports_bypass = 26;
+    bool no_support_bypass = 26;
 }
