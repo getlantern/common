@@ -20,9 +20,19 @@ type AvailableServerLocations struct {
 // Map of outbound tag strings to server locations
 type OutboundLocations map[string]*ServerLocation
 
-type Config struct {
+type ConfigResponse struct {
 	UserInfo
 	AvailableServerLocations
 	OutboundLocations
 	O.Options
+}
+
+type ConfigRequest struct {
+	ProToken          string `json:"pro_token,omitempty"`
+	ClientVersion     string `json:"client_version,omitempty"`
+	DeviceID          string `json:"device_id,omitempty"`
+	SingboxVersion    string `json:"singbox_version,omitempty"`
+	OS                string `json:"os,omitempty"`
+	AppName           string `json:"app_name,omitempty"`
+	PreferredLocation string `json:"preferred_location,omitempty"`
 }
