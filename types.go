@@ -20,7 +20,7 @@ type AvailableServerLocations struct {
 // Map of outbound tag strings to server locations
 type OutboundLocations map[string]*ServerLocation
 
-type Response struct {
+type ConfigResponse struct {
 	UserInfo
 	AvailableServerLocations
 	OutboundLocations
