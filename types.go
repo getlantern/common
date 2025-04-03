@@ -9,12 +9,11 @@ type UserInfo struct {
 }
 
 type ServerLocation struct {
-	Country string `json:"country,omitempty"`
-	City    string `json:"city,omitempty"`
-}
-
-type AvailableServerLocations struct {
-	Servers []ServerLocation `json:"servers,omitempty"`
+	Country     string  `json:"country,omitempty"`
+	City        string  `json:"city,omitempty"`
+	Latitude    float32 `json:"latitude,omitempty"`
+	Longitude   float32 `json:"longitude,omitempty"`
+	CountryCode string  `json:"country_code,omitempty"`
 }
 
 // Map of outbound tag strings to server locations
@@ -22,7 +21,7 @@ type OutboundLocations map[string]*ServerLocation
 
 type ConfigResponse struct {
 	UserInfo
-	AvailableServerLocations
+	Servers []ServerLocation `json:"servers,omitempty"`
 	OutboundLocations
 	O.Options
 }
