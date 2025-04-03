@@ -28,7 +28,6 @@ type ConfigResponse struct {
 }
 
 type ConfigRequest struct {
-	ProToken          string         `json:"pro_token,omitempty"`
 	ClientVersion     string         `json:"client_version,omitempty"`
 	DeviceID          string         `json:"device_id,omitempty"`
 	SingboxVersion    string         `json:"singbox_version,omitempty"`
@@ -36,4 +35,5 @@ type ConfigRequest struct {
 	AppName           string         `json:"app_name,omitempty"`
 	PreferredLocation ServerLocation `json:"preferred_location,omitempty"`
 	UserID            string         `json:"user_id,omitempty"`
+	WGPublicKey       string         `json:"wg_public_key,omitempty"`
 }
