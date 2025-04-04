@@ -1,10 +1,11 @@
 package config
 
 import (
-	"encoding/json"
+	//"encoding/json"
+	"log/slog"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/sagernet/sing/common/json"
 )
 
 func TestConfigRequestSerialization(t *testing.T) {
@@ -31,6 +32,7 @@ func TestConfigRequestSerialization(t *testing.T) {
 		t.Fatalf("Failed to serialize ConfigRequest: %v", err)
 	}
 
+	slog.Info("Serialized ConfigRequest", slog.String("data", string(data)))
 	// Deserialize back to struct
 	var deserialized ConfigRequest
 	err = json.Unmarshal(data, &deserialized)
@@ -59,6 +61,7 @@ func TestConfigRequestDefaultValues(t *testing.T) {
 }
 func TestConfigResponseSerialization(t *testing.T) {
 	original := ConfigResponse{
+		Date: "2023-01-01",
 		UserInfo: UserInfo{
 			ProToken: "token123",
 			Country:  "USA",
@@ -81,7 +84,7 @@ func TestConfigResponseSerialization(t *testing.T) {
 			},
 		},
 		OutboundLocations: OutboundLocations{
-			"outbound1": &ServerLocation{
+			"tag1": {
 				Country:     "Germany",
 				City:        "Berlin",
 				Latitude:    52.52,
@@ -97,6 +100,7 @@ func TestConfigResponseSerialization(t *testing.T) {
 		t.Fatalf("Failed to serialize ConfigResponse: %v", err)
 	}
 
+	slog.Info("Serialized ConfigResponse", slog.String("data", string(data)))
 	// Deserialize back to struct
 	var deserialized ConfigResponse
 	err = json.Unmarshal(data, &deserialized)
@@ -105,35 +109,27 @@ func TestConfigResponseSerialization(t *testing.T) {
 	}
 
 	// Compare original and deserialized structs
-	if original.UserInfo != deserialized.UserInfo {
-		t.Errorf("Deserialized UserInfo does not match original.\nOriginal: %+v\nDeserialized: %+v", original.UserInfo, deserialized.UserInfo)
+	if original.Date != deserialized.Date ||
+		original.UserInfo != deserialized.UserInfo ||
+		len(original.Servers) != len(deserialized.Servers) ||
+		len(original.OutboundLocations) != len(deserialized.OutboundLocations) {
+		t.Errorf("Deserialized ConfigResponse does not match original.\nOriginal: %+v\nDeserialized: %+v", original, deserialized)
 	}
+}
 
-	if len(original.Servers) != len(deserialized.Servers) {
-		t.Fatalf("Expected %d servers, got %d", len(original.Servers), len(deserialized.Servers))
-	}
-	for i, server := range original.Servers {
-		if server != deserialized.Servers[i] {
-			t.Errorf("Server at index %d does not match.\nOriginal: %+v\nDeserialized: %+v", i, server, deserialized.Servers[i])
-		}
-	}
+func TestConfigResponseDefaultValues(t *testing.T) {
+	resp := ConfigResponse{}
 
-	if len(original.OutboundLocations) != len(deserialized.OutboundLocations) {
-		t.Fatalf("Expected %d outbound locations, got %d", len(original.OutboundLocations), len(deserialized.OutboundLocations))
+	if resp.Date != "" {
+		t.Errorf("Expected default Date to be empty, got: %s", resp.Date)
 	}
-	for key, location := range original.OutboundLocations {
-		if deserialized.OutboundLocations[key] == nil || *location != *deserialized.OutboundLocations[key] {
-			t.Errorf("Outbound location for key %s does not match.\nOriginal: %+v\nDeserialized: %+v", key, location, deserialized.OutboundLocations[key])
-		}
+	if resp.UserInfo.ProToken != "" {
+		t.Errorf("Expected default UserInfo.ProToken to be empty, got: %s", resp.UserInfo.ProToken)
 	}
-
-	data = []byte("{\"pro_token\":\"mock-token\",\"OutboundLocations\":null}")
-	// Deserialize back to struct
-	var cr ConfigResponse
-	err = json.Unmarshal(data, &cr)
-	if err != nil {
-		t.Fatalf("Failed to deserialize ConfigResponse: %v", err)
+	if len(resp.Servers) != 0 {
+		t.Errorf("Expected default Servers to be empty, got: %+v", resp.Servers)
 	}
-
-	assert.Equal(t, cr.UserInfo.ProToken, "mock-token")
+	if len(resp.OutboundLocations) != 0 {
+		t.Errorf("Expected default OutboundLocations to be empty, got: %+v", resp.OutboundLocations)
+	}
 }

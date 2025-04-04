@@ -20,10 +20,11 @@ type ServerLocation struct {
 type OutboundLocations map[string]*ServerLocation
 
 type ConfigResponse struct {
+	Date              string `json:"date,omitempty"`
 	UserInfo          `json:"user_info,omitempty"`
 	Servers           []ServerLocation `json:"servers,omitempty"`
 	OutboundLocations `json:"outbound_locations,omitempty"`
-	O.Options         `json:"options,omitempty"`
+	Options           O.Options `json:"options,omitempty"`
 }
 
 type ConfigRequest struct {
