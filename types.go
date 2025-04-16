@@ -1,6 +1,8 @@
 package config
 
-import O "github.com/sagernet/sing-box/option"
+import (
+	O "github.com/sagernet/sing-box/option"
+)
 
 type UserInfo struct {
 	ProToken string `json:"pro_token,omitempty"`
@@ -14,6 +16,7 @@ type ServerLocation struct {
 	Latitude    float32 `json:"latitude,omitempty"`
 	Longitude   float32 `json:"longitude,omitempty"`
 	CountryCode string  `json:"country_code,omitempty"`
+	WGPubkey    string  `json:"wg_pub_key"`
 }
 
 // Map of outbound tag strings to server locations
@@ -28,12 +31,16 @@ type ConfigResponse struct {
 }
 
 type ConfigRequest struct {
-	ClientVersion     string         `json:"client_version,omitempty"`
-	DeviceID          string         `json:"device_id,omitempty"`
-	SingboxVersion    string         `json:"singbox_version,omitempty"`
-	OS                string         `json:"os,omitempty"`
-	AppName           string         `json:"app_name,omitempty"`
-	PreferredLocation ServerLocation `json:"preferred_location,omitempty"`
-	UserID            string         `json:"user_id,omitempty"`
-	WGPublicKey       string         `json:"wg_public_key,omitempty"`
+	ClientVersion     string          `json:"client_version,omitempty"`
+	DeviceID          string          `json:"device_id,omitempty"`
+	RadianceVersion   string          `json:"radiance_version"`
+	SingboxVersion    string          `json:"singbox_version,omitempty"`
+	OS                string          `json:"os,omitempty"`
+	AppName           string          `json:"app_name,omitempty"`
+	PreferredLocation *ServerLocation `json:"preferred_location,omitempty"`
+	UserID            string          `json:"user_id,omitempty"`
+	ProToken          string          `json:"pro_token,omitempty"`
+	WGPublicKey       string          `json:"wg_public_key,omitempty"`
+	Country           string          `json:"country,omitempty"`
+	Ip                string          `json:"ip,omitempty"`
 }
