@@ -30,9 +30,7 @@ type ConfigResponse struct {
 }
 
 type ConfigRequest struct {
-	ClientVersion     string          `json:"client_version,omitempty"`
 	DeviceID          string          `json:"device_id,omitempty"`
-	RadianceVersion   string          `json:"radiance_version"`
 	SingboxVersion    string          `json:"singbox_version,omitempty"`
 	OS                string          `json:"os,omitempty"`
 	AppName           string          `json:"app_name,omitempty"`
@@ -40,6 +38,6 @@ type ConfigRequest struct {
 	UserID            string          `json:"user_id,omitempty"`
 	ProToken          string          `json:"pro_token,omitempty"`
 	WGPublicKey       string          `json:"wg_public_key,omitempty"`
-	Country           string          `json:"country,omitempty"`
-	Ip                string          `json:"ip,omitempty"`
+	ClientBackend     string          `json:"client_backend,omitempty"`
+	ClientPlatform    string          `json:"client_platform,omitempty"`
 }
