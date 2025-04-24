@@ -16,7 +16,6 @@ type ServerLocation struct {
 	Latitude    float32 `json:"latitude,omitempty"`
 	Longitude   float32 `json:"longitude,omitempty"`
 	CountryCode string  `json:"country_code,omitempty"`
-	WGPubkey    string  `json:"wg_pub_key"`
 }
 
 // Map of outbound tag strings to server locations
