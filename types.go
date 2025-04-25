@@ -36,6 +36,5 @@ type ConfigRequest struct {
 	UserID            string          `json:"user_id,omitempty"`
 	ProToken          string          `json:"pro_token,omitempty"`
 	WGPublicKey       string          `json:"wg_public_key,omitempty"`
-	ClientBackend     string          `json:"client_backend,omitempty"`
-	ClientPlatform    string          `json:"client_platform,omitempty"`
+	Backend           string          `json:"backend,omitempty"`
 }
