@@ -2,6 +2,8 @@ package common
 
 import O "github.com/sagernet/sing-box/option"
 
+const SINGBOX = "sing-box"
+
 type UserInfo struct {
 	ProToken string `json:"pro_token,omitempty"`
 	Country  string `json:"country,omitempty"`
