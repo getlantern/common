@@ -1,8 +1,6 @@
 package config
 
-import (
-	sagerNetOpt "github.com/sagernet/sing-box/option"
-)
+import O "github.com/sagernet/sing-box/option"
 
 type UserInfo struct {
 	ProToken string `json:"pro_token,omitempty"`
@@ -26,7 +24,7 @@ type ConfigResponse struct {
 	UserInfo          `json:"user_info,omitempty"`
 	Servers           []ServerLocation `json:"servers,omitempty"`
 	OutboundLocations `json:"outbound_locations,omitempty"`
-	Options           sagerNetOpt.Options `json:"options,omitempty"`
+	Options           O.Options `json:"options,omitempty"`
 }
 
 type ConfigRequest struct {
