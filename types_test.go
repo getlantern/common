@@ -1,7 +1,6 @@
 package config
 
 import (
-	//"encoding/json"
 	"log/slog"
 	"testing"
 
@@ -10,12 +9,11 @@ import (
 
 func TestConfigRequestSerialization(t *testing.T) {
 	original := ConfigRequest{
-		ClientVersion:  "1.0.0",
 		DeviceID:       "device123",
 		SingboxVersion: "2.0.0",
 		OS:             "linux",
 		AppName:        "testApp",
-		PreferredLocation: ServerLocation{
+		PreferredLocation: &ServerLocation{
 			Country:     "USA",
 			City:        "New York",
 			Latitude:    40.7128,
@@ -49,9 +47,6 @@ func TestConfigRequestSerialization(t *testing.T) {
 func TestConfigRequestDefaultValues(t *testing.T) {
 	req := ConfigRequest{}
 
-	if req.ClientVersion != "" {
-		t.Errorf("Expected default ClientVersion to be empty, got: %s", req.ClientVersion)
-	}
 	if req.DeviceID != "" {
 		t.Errorf("Expected default DeviceID to be empty, got: %s", req.DeviceID)
 	}
