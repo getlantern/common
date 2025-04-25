@@ -1,4 +1,4 @@
-package config
+package common
 
 import O "github.com/sagernet/sing-box/option"
 
