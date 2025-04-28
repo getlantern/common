@@ -8,6 +8,7 @@ type UserInfo struct {
 	ProToken string `json:"pro_token,omitempty"`
 	Country  string `json:"country,omitempty"`
 	IP       string `json:"ip,omitempty"`
+	ID       string `json:"id,omitempty"`
 }
 
 type ServerLocation struct {
