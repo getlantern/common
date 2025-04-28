@@ -9,7 +9,6 @@ type UserInfo struct {
 	Country  string `json:"country,omitempty"`
 	IP       string `json:"ip,omitempty"`
 	ID       string `json:"id,omitempty"`
-	Locale   string `json:"locale,omitempty"`
 }
 
 type ServerLocation struct {
@@ -41,4 +40,5 @@ type ConfigRequest struct {
 	ProToken          string          `json:"pro_token,omitempty"`
 	WGPublicKey       string          `json:"wg_public_key,omitempty"`
 	Backend           string          `json:"backend,omitempty"`
+	Locale            string          `json:"locale,omitempty"`
 }
