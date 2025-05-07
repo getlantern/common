@@ -41,4 +41,5 @@ type ConfigRequest struct {
 	WGPublicKey       string          `json:"wg_public_key,omitempty"`
 	Backend           string          `json:"backend,omitempty"`
 	Locale            string          `json:"locale,omitempty"`
+	Protocols         []string        `json:"protocols,omitempty"`
 }
