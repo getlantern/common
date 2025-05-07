@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/sagernet/sing/common/json"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConfigRequestSerialization(t *testing.T) {
@@ -37,11 +38,8 @@ func TestConfigRequestSerialization(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to deserialize ConfigRequest: %v", err)
 	}
-
-	// Compare original and deserialized structs
-	if original != deserialized {
-		t.Errorf("Deserialized ConfigRequest does not match original.\nOriginal: %+v\nDeserialized: %+v", original, deserialized)
-	}
+	// Check deep equality of structs.
+	assert.ObjectsAreEqual(original, deserialized)
 }
 
 func TestConfigRequestDefaultValues(t *testing.T) {
