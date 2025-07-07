@@ -27,7 +27,9 @@ type ConfigResponse struct {
 	UserInfo          `json:"user_info,omitempty"`
 	Servers           []ServerLocation `json:"servers,omitempty"`
 	OutboundLocations `json:"outbound_locations,omitempty"`
-	Options           O.Options `json:"options,omitempty"`
+	OTELEndpoint      string            `json:"otel_endpoint,omitempty"`
+	OTELHeaders       map[string]string `json:"otel_headers,omitempty"`
+	Options           O.Options         `json:"options,omitempty"`
 }
 
 type ConfigRequest struct {
