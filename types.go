@@ -19,6 +19,13 @@ type ServerLocation struct {
 	CountryCode string  `json:"country_code,omitempty"`
 }
 
+type OTEL struct {
+	Enabled    bool              `json:"enabled,omitempty"`
+	Endpoint   string            `json:"endpoint,omitempty"`
+	Headers    map[string]string `json:"headers,omitempty"`
+	SampleRate float64           `json:"sample_rate,omitempty"`
+}
+
 // Map of outbound tag strings to server locations
 type OutboundLocations map[string]*ServerLocation
 
@@ -27,9 +34,8 @@ type ConfigResponse struct {
 	UserInfo          `json:"user_info,omitempty"`
 	Servers           []ServerLocation `json:"servers,omitempty"`
 	OutboundLocations `json:"outbound_locations,omitempty"`
-	OTELEndpoint      string            `json:"otel_endpoint,omitempty"`
-	OTELHeaders       map[string]string `json:"otel_headers,omitempty"`
-	Options           O.Options         `json:"options,omitempty"`
+	OTEL              `json:"otel,omitempty"`
+	Options           O.Options `json:"options,omitempty"`
 }
 
 type ConfigRequest struct {
