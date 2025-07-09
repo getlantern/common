@@ -20,11 +20,12 @@ type ServerLocation struct {
 }
 
 type OTEL struct {
-	Endpoint       string            `json:"endpoint,omitempty"`
-	Headers        map[string]string `json:"headers,omitempty"`
-	SampleRate     float64           `json:"sample_rate,omitempty"`
-	TracesEnabled  bool              `json:"traces_enabled,omitempty"`
-	MetricsEnabled bool              `json:"metrics_enabled,omitempty"`
+	Endpoint         string            `json:"endpoint,omitempty"`
+	Headers          map[string]string `json:"headers,omitempty"`
+	TracesEnabled    bool              `json:"traces_enabled,omitempty"`
+	TracesSampleRate float64           `json:"sample_rate,omitempty"`
+	MetricsEnabled   bool              `json:"metrics_enabled,omitempty"`
+	MetricsInterval  int               `json:"metrics_interval,omitempty"`
 }
 
 // Map of outbound tag strings to server locations
