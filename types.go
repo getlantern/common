@@ -4,6 +4,13 @@ import O "github.com/sagernet/sing-box/option"
 
 const SINGBOX = "sing-box"
 
+// Feature flags
+const (
+	TRACES  = "otel.traces"
+	METRICS = "otel.metrics"
+	GCP     = "private.gcp"
+)
+
 type UserInfo struct {
 	ProToken string `json:"pro_token,omitempty"`
 	Country  string `json:"country,omitempty"`
