@@ -12,7 +12,7 @@ func TestConfigRequestSerialization(t *testing.T) {
 	original := ConfigRequest{
 		DeviceID:       "device123",
 		SingboxVersion: "2.0.0",
-		OS:             "linux",
+		Platform:       "linux",
 		AppName:        "testApp",
 		PreferredLocation: &ServerLocation{
 			Country:     "USA",

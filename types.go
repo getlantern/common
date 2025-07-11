@@ -44,7 +44,7 @@ type ConfigResponse struct {
 type ConfigRequest struct {
 	DeviceID          string          `json:"device_id,omitempty"`
 	SingboxVersion    string          `json:"singbox_version,omitempty"`
-	OS                string          `json:"os,omitempty"`
+	Platform          string          `json:"platform,omitempty"`
 	AppName           string          `json:"app_name,omitempty"`
 	PreferredLocation *ServerLocation `json:"preferred_location,omitempty"`
 	UserID            string          `json:"user_id,omitempty"`
