@@ -9,7 +9,7 @@ type UserInfo struct {
 	Country  string `json:"country,omitempty"`
 	IP       string `json:"ip,omitempty"`
 	ID       string `json:"id,omitempty"`
-	IsPro    bool   `json:"is_pro,omitempty"`
+	Pro      bool   `json:"pro,omitempty"`
 }
 
 type ServerLocation struct {
