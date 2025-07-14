@@ -4,11 +4,18 @@ import O "github.com/sagernet/sing-box/option"
 
 const SINGBOX = "sing-box"
 
-// Feature flags
+// Feature flags for Lantern clients. These should correspond directly with
+// the feature names on the Unleash server at https://unleash.lantr.net/projects/default/features
+// These are also exposed to the frontend/Flutter side via the same keys.
 const (
-	TRACES  = "otel.traces"
+	// Whether or not client-side traces should be enabled.
+	TRACES = "otel.traces"
+
+	// Whether or not client-side metrics should be enabled.
 	METRICS = "otel.metrics"
-	GCP     = "private.gcp"
+
+	// Whether or not users should have the option to launch private servers on GCP.
+	GCP = "private.gcp"
 )
 
 type UserInfo struct {
