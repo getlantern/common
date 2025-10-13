@@ -54,12 +54,6 @@ func TestConfigRequestDefaultValues(t *testing.T) {
 }
 func TestConfigResponseSerialization(t *testing.T) {
 	original := ConfigResponse{
-		Date: "2023-01-01",
-		UserInfo: UserInfo{
-			ProToken: "token123",
-			Country:  "USA",
-			IP:       "192.168.1.1",
-		},
 		Servers: []ServerLocation{
 			{
 				Country:     "USA",
@@ -102,8 +96,7 @@ func TestConfigResponseSerialization(t *testing.T) {
 	}
 
 	// Compare original and deserialized structs
-	if original.Date != deserialized.Date ||
-		original.UserInfo != deserialized.UserInfo ||
+	if original.UserData.Token != deserialized.UserData.Token ||
 		len(original.Servers) != len(deserialized.Servers) ||
 		len(original.OutboundLocations) != len(deserialized.OutboundLocations) {
 		t.Errorf("Deserialized ConfigResponse does not match original.\nOriginal: %+v\nDeserialized: %+v", original, deserialized)
@@ -112,12 +105,8 @@ func TestConfigResponseSerialization(t *testing.T) {
 
 func TestConfigResponseDefaultValues(t *testing.T) {
 	resp := ConfigResponse{}
-
-	if resp.Date != "" {
-		t.Errorf("Expected default Date to be empty, got: %s", resp.Date)
-	}
-	if resp.UserInfo.ProToken != "" {
-		t.Errorf("Expected default UserInfo.ProToken to be empty, got: %s", resp.UserInfo.ProToken)
+	if resp.UserData.Token != "" {
+		t.Errorf("Expected default UserData.Token to be empty, got: %s", resp.UserData.Token)
 	}
 	if len(resp.Servers) != 0 {
 		t.Errorf("Expected default Servers to be empty, got: %+v", resp.Servers)
