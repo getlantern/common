@@ -178,6 +178,7 @@ type UserData struct {
 	SubscriptionData *SubscriptionData   `json:"subscriptionData"`
 	IP               string              `json:"ip,omitempty"`
 	Country          string              `json:"country,omitempty"`
+	EmailConfirmed   bool                `json:"emailConfirmed,omitempty"`
 }
 
 type SubscriptionData struct {
