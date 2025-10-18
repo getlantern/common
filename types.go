@@ -39,7 +39,6 @@ type OutboundLocations map[string]*ServerLocation
 type ConfigResponse struct {
 	Country           string           `json:"country,omitempty"`
 	IP                string           `json:"ip,omitempty"`
-	Pro               bool             `json:"pro,omitempty"`
 	Servers           []ServerLocation `json:"servers,omitempty"`
 	OutboundLocations `json:"outbound_locations,omitempty"`
 	OTEL              `json:"otel,omitempty"`
