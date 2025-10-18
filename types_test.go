@@ -96,8 +96,7 @@ func TestConfigResponseSerialization(t *testing.T) {
 	}
 
 	// Compare original and deserialized structs
-	if original.UserData.Token != deserialized.UserData.Token ||
-		len(original.Servers) != len(deserialized.Servers) ||
+	if len(original.Servers) != len(deserialized.Servers) ||
 		len(original.OutboundLocations) != len(deserialized.OutboundLocations) {
 		t.Errorf("Deserialized ConfigResponse does not match original.\nOriginal: %+v\nDeserialized: %+v", original, deserialized)
 	}
@@ -105,9 +104,6 @@ func TestConfigResponseSerialization(t *testing.T) {
 
 func TestConfigResponseDefaultValues(t *testing.T) {
 	resp := ConfigResponse{}
-	if resp.UserData.Token != "" {
-		t.Errorf("Expected default UserData.Token to be empty, got: %s", resp.UserData.Token)
-	}
 	if len(resp.Servers) != 0 {
 		t.Errorf("Expected default Servers to be empty, got: %+v", resp.Servers)
 	}

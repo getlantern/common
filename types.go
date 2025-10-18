@@ -18,14 +18,6 @@ const (
 	GCP = "private.gcp"
 )
 
-type UserInfo struct {
-	ProToken string `json:"pro_token,omitempty"`
-	Country  string `json:"country,omitempty"`
-	IP       string `json:"ip,omitempty"`
-	ID       string `json:"id,omitempty"`
-	Pro      bool   `json:"pro,omitempty"`
-}
-
 type ServerLocation struct {
 	Country     string  `json:"country,omitempty"`
 	City        string  `json:"city,omitempty"`
@@ -45,8 +37,8 @@ type OTEL struct {
 type OutboundLocations map[string]*ServerLocation
 
 type ConfigResponse struct {
-	Date              string `json:"date,omitempty"`
-	UserInfo          `json:"user_info,omitempty"`
+	Country           string           `json:"country,omitempty"`
+	IP                string           `json:"ip,omitempty"`
 	Servers           []ServerLocation `json:"servers,omitempty"`
 	OutboundLocations `json:"outbound_locations,omitempty"`
 	OTEL              `json:"otel,omitempty"`
