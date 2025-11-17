@@ -58,4 +58,5 @@ type ConfigRequest struct {
 	Backend           string          `json:"backend,omitempty"`
 	Locale            string          `json:"locale,omitempty"`
 	Protocols         []string        `json:"protocols,omitempty"`
+	MetricsOptedIn    bool            `json:"metrics_opted_in,omitempty"`
 }
