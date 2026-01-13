@@ -43,9 +43,13 @@ type SmartRoutingRule struct {
 }
 
 type RuleSet struct {
-	Tag    string `json:"tag,omitempty"`
-	URL    string `json:"url,omitempty"`
+	Tag string `json:"tag,omitempty"`
+	URL string `json:"url,omitempty"`
+	// ruleset format: sing-box/constant.RuleSetFormatBinary (SRS) or sing-box/constant.RuleSetFormatSource (JSON)
+	// Defaults to SRS if omitted
 	Format string `json:"format,omitempty"`
+	// outbound to use for downloading the ruleset. If omitted, uses the "direct" outbound.
+	DownloadDetour string `json:"download_detour,omitempty"`
 }
 
 type ConfigResponse struct {
