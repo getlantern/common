@@ -36,10 +36,16 @@ type OTEL struct {
 // Map of outbound tag strings to server locations
 type OutboundLocations map[string]*ServerLocation
 
+type SmartRoutingRules []SmartRoutingRule
+
+type AdBlockRules RuleSets
+
+type RuleSets []RuleSet
+
 type SmartRoutingRule struct {
-	Category  string    `json:"category,omitempty"`
-	RuleSets  []RuleSet `json:"rule_sets,omitempty"`
-	Outbounds []string  `json:"outbounds,omitempty"`
+	Category  string   `json:"category,omitempty"`
+	RuleSets  RuleSets `json:"rule_sets,omitempty"`
+	Outbounds []string `json:"outbounds,omitempty"`
 }
 
 type RuleSet struct {
@@ -58,10 +64,10 @@ type ConfigResponse struct {
 	Servers           []ServerLocation `json:"servers,omitempty"`
 	OutboundLocations `json:"outbound_locations,omitempty"`
 	OTEL              `json:"otel,omitempty"`
-	Features          map[string]bool    `json:"features,omitempty"`
-	Options           O.Options          `json:"options,omitempty"`
-	SmartRouting      []SmartRoutingRule `json:"smart_routing,omitempty"`
-	AdBlock           []RuleSet          `json:"ad_block,omitempty"`
+	Features          map[string]bool   `json:"features,omitempty"`
+	Options           O.Options         `json:"options,omitempty"`
+	SmartRouting      SmartRoutingRules `json:"smart_routing,omitempty"`
+	AdBlock           AdBlockRules      `json:"ad_block,omitempty"`
 }
 
 type ConfigRequest struct {
