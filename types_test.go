@@ -68,6 +68,7 @@ func TestConfigResponseSerialization(t *testing.T) {
 				Latitude:    43.65107,
 				Longitude:   -79.347015,
 				CountryCode: "CA",
+				Suffix:      "-1",
 			},
 		},
 		OutboundLocations: OutboundLocations{
@@ -77,6 +78,7 @@ func TestConfigResponseSerialization(t *testing.T) {
 				Latitude:    52.52,
 				Longitude:   13.405,
 				CountryCode: "DE",
+				Suffix:      "-1",
 			},
 		},
 	}

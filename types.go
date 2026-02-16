@@ -24,6 +24,7 @@ type ServerLocation struct {
 	Latitude    float32 `json:"latitude,omitempty"`
 	Longitude   float32 `json:"longitude,omitempty"`
 	CountryCode string  `json:"country_code,omitempty"`
+	Suffix      string  `json:"suffix,omitempty"`
 }
 
 type OTEL struct {
