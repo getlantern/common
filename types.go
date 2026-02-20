@@ -68,6 +68,12 @@ type ConfigResponse struct {
 	Options           O.Options         `json:"options,omitempty"`
 	SmartRouting      SmartRoutingRules `json:"smart_routing,omitempty"`
 	AdBlock           AdBlockRules      `json:"ad_block,omitempty"`
+
+	// BanditURLOverrides maps outbound tags to per-proxy callback URLs for
+	// the bandit Thompson sampling system. When set, these override the
+	// default MutableURLTest URL for each specific outbound, allowing the
+	// server to detect which proxies successfully connected.
+	BanditURLOverrides map[string]string `json:"bandit_url_overrides,omitempty"`
 }
 
 type ConfigRequest struct {
@@ -83,4 +89,5 @@ type ConfigRequest struct {
 	Locale            string          `json:"locale,omitempty"`
 	Protocols         []string        `json:"protocols,omitempty"`
 	MetricsOptedIn    bool            `json:"metrics_opted_in,omitempty"`
+	Version           string          `json:"version,omitempty"`
 }
