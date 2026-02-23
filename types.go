@@ -16,6 +16,9 @@ const (
 
 	// Whether or not users should have the option to launch private servers on GCP.
 	GCP = "private.gcp"
+
+	// Whether or not the client should run the unbounded widget proxy.
+	UNBOUNDED = "unbounded"
 )
 
 type ServerLocation struct {
@@ -58,6 +61,15 @@ type RuleSet struct {
 	DownloadDetour string `json:"download_detour,omitempty"`
 }
 
+type UnboundedConfig struct {
+	DiscoverySrv      string `json:"discovery_srv,omitempty"`
+	DiscoveryEndpoint string `json:"discovery_endpoint,omitempty"`
+	EgressAddr        string `json:"egress_addr,omitempty"`
+	EgressEndpoint    string `json:"egress_endpoint,omitempty"`
+	CTableSize        int    `json:"ctable_size,omitempty"`
+	PTableSize        int    `json:"ptable_size,omitempty"`
+}
+
 type ConfigResponse struct {
 	Country           string           `json:"country,omitempty"`
 	IP                string           `json:"ip,omitempty"`
@@ -74,6 +86,8 @@ type ConfigResponse struct {
 	// default MutableURLTest URL for each specific outbound, allowing the
 	// server to detect which proxies successfully connected.
 	BanditURLOverrides map[string]string `json:"bandit_url_overrides,omitempty"`
+
+	Unbounded *UnboundedConfig `json:"unbounded,omitempty"`
 }
 
 type ConfigRequest struct {
