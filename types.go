@@ -85,7 +85,8 @@ type ConfigResponse struct {
 	// the bandit Thompson sampling system. When set, these override the
 	// default MutableURLTest URL for each specific outbound, allowing the
 	// server to detect which proxies successfully connected.
-	BanditURLOverrides map[string]string `json:"bandit_url_overrides,omitempty"`
+	BanditURLOverrides  map[string]string `json:"bandit_url_overrides,omitempty"`
+	BanditThroughputURL string            `json:"bandit_throughput_url,omitempty"`
 
 	Unbounded *UnboundedConfig `json:"unbounded,omitempty"`
 }
