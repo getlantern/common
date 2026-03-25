@@ -17,7 +17,7 @@ func (srs SmartRoutingRules) ToOptions(urlTestInterval, urlTestIdleTimeout time.
 	for _, sr := range srs {
 		rs := sr.RuleSets.ToOptions()
 		tags := sr.RuleSets.Tags()
-		detour := sr.Category
+		detour := "sr-" + sr.Category
 		if len(sr.Outbounds) == 1 && sr.Outbounds[0] == "direct" {
 			detour = "direct"
 		}
@@ -41,7 +41,7 @@ func (srs SmartRoutingRules) ToOptions(urlTestInterval, urlTestIdleTimeout time.
 		if detour != "direct" {
 			outbounds = append(outbounds, option.Outbound{
 				Type: constant.TypeURLTest,
-				Tag:  "sr-" + sr.Category,
+				Tag:  detour,
 				Options: &option.URLTestOutboundOptions{
 					Outbounds:   sr.Outbounds,
 					URL:         "https://google.com/generate_204",
