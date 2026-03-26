@@ -102,6 +102,29 @@ func TestConfigResponseSerialization(t *testing.T) {
 	}
 }
 
+func TestPollIntervalSecondsRoundTrip(t *testing.T) {
+	original := ConfigResponse{
+		PollIntervalSeconds: 30,
+	}
+
+	data, err := json.Marshal(original)
+	assert.NoError(t, err)
+
+	// Non-zero value should appear in JSON
+	assert.Contains(t, string(data), `"poll_interval_seconds":30`)
+
+	var deserialized ConfigResponse
+	err = json.Unmarshal(data, &deserialized)
+	assert.NoError(t, err)
+	assert.Equal(t, 30, deserialized.PollIntervalSeconds)
+
+	// Zero value should be omitted from JSON
+	zeroResp := ConfigResponse{}
+	data, err = json.Marshal(zeroResp)
+	assert.NoError(t, err)
+	assert.NotContains(t, string(data), "poll_interval_seconds")
+}
+
 func TestConfigResponseDefaultValues(t *testing.T) {
 	resp := ConfigResponse{}
 	if len(resp.Servers) != 0 {

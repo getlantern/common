@@ -81,6 +81,12 @@ type ConfigResponse struct {
 	SmartRouting      SmartRoutingRules `json:"smart_routing,omitempty"`
 	AdBlock           AdBlockRules      `json:"ad_block,omitempty"`
 
+	// PollIntervalSeconds tells the client how long to wait before fetching
+	// a new config. The server adjusts this based on bandit confidence —
+	// shorter intervals when learning (new ASN, high entropy), longer when
+	// the assignment is stable. Zero means use the client's default.
+	PollIntervalSeconds int `json:"poll_interval_seconds,omitempty"`
+
 	// BanditURLOverrides maps outbound tags to per-proxy callback URLs for
 	// the bandit Thompson sampling system. When set, these override the
 	// default MutableURLTest URL for each specific outbound, allowing the
