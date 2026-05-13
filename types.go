@@ -111,4 +111,22 @@ type ConfigRequest struct {
 	Protocols         []string        `json:"protocols,omitempty"`
 	MetricsOptedIn    bool            `json:"metrics_opted_in,omitempty"`
 	Version           string          `json:"version,omitempty"`
+
+	// PinnedRouteID is the server-side route ID the client is currently
+	// connected to as a result of an explicit manual server selection
+	// (Pro-only feature in the UI). When set alongside PreferredLocation,
+	// the server tries to keep this specific route in the assignment
+	// response so the client doesn't have to redial when the bandit (or
+	// hash-ring path) would otherwise pick a different route in the same
+	// or another location.
+	//
+	// The pin is advisory: if the route has been deprecated, destroyed,
+	// or now points at a track the client can't consume, the server
+	// silently omits it from the response. The client should detect the
+	// pin's absence and clear it from local state so the UI no longer
+	// shows the route as "currently selected".
+	//
+	// No server-side per-device state is kept — the client carries this
+	// value across config fetches.
+	PinnedRouteID string `json:"pinned_route_id,omitempty"`
 }
