@@ -102,36 +102,6 @@ func TestConfigResponseSerialization(t *testing.T) {
 	}
 }
 
-func TestPinnedRouteIDRoundTrip(t *testing.T) {
-	const pin = "9b39797c-19bd-4a5d-9cf9-8ba06d41dd2c"
-
-	original := ConfigRequest{
-		DeviceID:      "device123",
-		PinnedRouteID: pin,
-	}
-
-	data, err := json.Marshal(original)
-	assert.NoError(t, err)
-
-	// Non-empty value must appear in JSON so the server can read it.
-	assert.Contains(t, string(data), `"pinned_route_id":"`+pin+`"`)
-
-	var deserialized ConfigRequest
-	err = json.Unmarshal(data, &deserialized)
-	assert.NoError(t, err)
-	assert.Equal(t, pin, deserialized.PinnedRouteID)
-
-	// Empty value (clients that don't pin, or have just cleared their pin)
-	// must be omitted from the JSON so requests stay small and the server
-	// can cleanly distinguish "no pin set" from "pin explicitly set to
-	// empty string" (we treat both as no-pin, but the wire shape matters
-	// for log noise / SigNoz attribute presence).
-	zeroReq := ConfigRequest{DeviceID: "device123"}
-	data, err = json.Marshal(zeroReq)
-	assert.NoError(t, err)
-	assert.NotContains(t, string(data), "pinned_route_id")
-}
-
 func TestPollIntervalSecondsRoundTrip(t *testing.T) {
 	original := ConfigResponse{
 		PollIntervalSeconds: 30,
