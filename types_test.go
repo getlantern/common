@@ -125,6 +125,26 @@ func TestPollIntervalSecondsRoundTrip(t *testing.T) {
 	assert.NotContains(t, string(data), "poll_interval_seconds")
 }
 
+func TestNonSelectableOutboundsRoundTrip(t *testing.T) {
+	original := ConfigResponse{
+		NonSelectableOutbounds: []string{"proxyless"},
+	}
+
+	data, err := json.Marshal(original)
+	assert.NoError(t, err)
+	assert.Contains(t, string(data), `"non_selectable_outbounds":["proxyless"]`)
+
+	var deserialized ConfigResponse
+	err = json.Unmarshal(data, &deserialized)
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"proxyless"}, deserialized.NonSelectableOutbounds)
+
+	// Empty/nil should be omitted from JSON.
+	data, err = json.Marshal(ConfigResponse{})
+	assert.NoError(t, err)
+	assert.NotContains(t, string(data), "non_selectable_outbounds")
+}
+
 func TestConfigResponseDefaultValues(t *testing.T) {
 	resp := ConfigResponse{}
 	if len(resp.Servers) != 0 {
