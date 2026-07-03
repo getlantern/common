@@ -81,6 +81,14 @@ type ConfigResponse struct {
 	SmartRouting      SmartRoutingRules `json:"smart_routing,omitempty"`
 	AdBlock           AdBlockRules      `json:"ad_block,omitempty"`
 
+	// NonSelectableOutbounds lists the tags of outbounds in Options that are
+	// infrastructure (e.g. a proxyless download_detour for rule-set fetches) and
+	// must NOT be offered as user-selectable proxies: the client merges them into
+	// its box config so references resolve, but excludes them from the auto/manual
+	// selector groups. This lets the server introduce new optional/infra outbounds
+	// without a client release — the client honors whatever tags appear here.
+	NonSelectableOutbounds []string `json:"non_selectable_outbounds,omitempty"`
+
 	// PollIntervalSeconds tells the client how long to wait before fetching
 	// a new config. The server adjusts this based on bandit confidence —
 	// shorter intervals when learning (new ASN, high entropy), longer when
