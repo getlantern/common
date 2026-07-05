@@ -141,10 +141,12 @@ func TestNonSelectableOutboundsRoundTrip(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, []string{"proxyless"}, deserialized.NonSelectableOutbounds)
 
-	// Empty/nil should be omitted from JSON.
-	data, err = json.Marshal(ConfigResponse{})
-	assert.NoError(t, err)
-	assert.NotContains(t, string(data), "non_selectable_outbounds")
+	// Both nil and a non-nil empty slice should be omitted from JSON.
+	for _, empty := range []ConfigResponse{{}, {NonSelectableOutbounds: []string{}}} {
+		data, err = json.Marshal(empty)
+		assert.NoError(t, err)
+		assert.NotContains(t, string(data), "non_selectable_outbounds")
+	}
 }
 
 func TestConfigResponseDefaultValues(t *testing.T) {
