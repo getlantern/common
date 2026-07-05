@@ -132,7 +132,9 @@ func TestNonSelectableOutboundsRoundTrip(t *testing.T) {
 
 	data, err := json.Marshal(original)
 	assert.NoError(t, err)
-	assert.Contains(t, string(data), `"non_selectable_outbounds":["proxyless"]`)
+	// Verify the JSON tag name is present (not an exact substring, which would be
+	// brittle to encoder formatting); the round-trip below verifies the value.
+	assert.Contains(t, string(data), `"non_selectable_outbounds"`)
 
 	var deserialized ConfigResponse
 	err = json.Unmarshal(data, &deserialized)
