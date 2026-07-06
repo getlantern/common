@@ -167,7 +167,7 @@ func TestCapabilitiesRoundTrip(t *testing.T) {
 	for _, empty := range []ConfigRequest{{}, {Capabilities: []string{}}} {
 		data, err = json.Marshal(empty)
 		assert.NoError(t, err)
-		assert.NotContains(t, string(data), "capabilities")
+		assert.NotContains(t, string(data), `"capabilities"`)
 	}
 }
 
