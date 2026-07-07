@@ -94,6 +94,18 @@ type ConfigResponse struct {
 	BanditURLOverrides  map[string]string `json:"bandit_url_overrides,omitempty"`
 	BanditThroughputURL string            `json:"bandit_throughput_url,omitempty"`
 
+	// RouteSelectionReportIntervalSeconds tells the client how often to POST
+	// its per-route selection history (data-plane stall/reset counters) back
+	// to the server's /v1/bandit/report endpoint. Omitted or zero means the
+	// client does not report — the interval doubles as the enable switch.
+	RouteSelectionReportIntervalSeconds int `json:"route_selection_report_interval_seconds,omitempty"`
+
+	// BanditReportTokens maps outbound tags to HMAC-signed opaque report
+	// tokens, parallel to BanditURLOverrides. The client echoes each tag's
+	// token back in its selection-history report so the server can attribute
+	// the counters to a route without trusting any client-asserted identity.
+	BanditReportTokens map[string]string `json:"bandit_report_tokens,omitempty"`
+
 	Unbounded *UnboundedConfig `json:"unbounded,omitempty"`
 }
 
