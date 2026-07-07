@@ -21,6 +21,19 @@ const (
 	UNBOUNDED = "unbounded"
 )
 
+// Client capabilities, advertised in ConfigRequest.Capabilities, let the server
+// enable optional behavior per-client — capability negotiation instead of
+// version sniffing.
+const (
+	// CapabilityNonSelectableOutbounds: the client honors
+	// ConfigResponse.NonSelectableOutbounds (merges those outbounds into its box
+	// config but keeps them out of the proxy-selection groups). The server gates
+	// infrastructure outbounds like the proxyless download_detour on this, so an
+	// older client can't surface one as a selectable proxy and route traffic
+	// through it.
+	CapabilityNonSelectableOutbounds = "non_selectable_outbounds"
+)
+
 type ServerLocation struct {
 	Country     string  `json:"country,omitempty"`
 	City        string  `json:"city,omitempty"`
@@ -120,6 +133,9 @@ type ConfigRequest struct {
 	Backend           string          `json:"backend,omitempty"`
 	Locale            string          `json:"locale,omitempty"`
 	Protocols         []string        `json:"protocols,omitempty"`
-	MetricsOptedIn    bool            `json:"metrics_opted_in,omitempty"`
-	Version           string          `json:"version,omitempty"`
+	// Capabilities advertises optional client behaviors the server can gate on
+	// (see the Capability* consts), e.g. honoring NonSelectableOutbounds.
+	Capabilities   []string `json:"capabilities,omitempty"`
+	MetricsOptedIn bool     `json:"metrics_opted_in,omitempty"`
+	Version        string   `json:"version,omitempty"`
 }

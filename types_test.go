@@ -149,6 +149,28 @@ func TestNonSelectableOutboundsRoundTrip(t *testing.T) {
 	}
 }
 
+func TestCapabilitiesRoundTrip(t *testing.T) {
+	original := ConfigRequest{
+		Capabilities: []string{CapabilityNonSelectableOutbounds},
+	}
+
+	data, err := json.Marshal(original)
+	assert.NoError(t, err)
+	assert.Contains(t, string(data), `"capabilities"`)
+
+	var deserialized ConfigRequest
+	err = json.Unmarshal(data, &deserialized)
+	assert.NoError(t, err)
+	assert.Equal(t, []string{CapabilityNonSelectableOutbounds}, deserialized.Capabilities)
+
+	// Both nil and a non-nil empty slice should be omitted from JSON.
+	for _, empty := range []ConfigRequest{{}, {Capabilities: []string{}}} {
+		data, err = json.Marshal(empty)
+		assert.NoError(t, err)
+		assert.NotContains(t, string(data), `"capabilities"`)
+	}
+}
+
 func TestConfigResponseDefaultValues(t *testing.T) {
 	resp := ConfigResponse{}
 	if len(resp.Servers) != 0 {
