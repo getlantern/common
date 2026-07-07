@@ -125,6 +125,30 @@ func TestPollIntervalSecondsRoundTrip(t *testing.T) {
 	assert.NotContains(t, string(data), "poll_interval_seconds")
 }
 
+func TestNonSelectableOutboundsRoundTrip(t *testing.T) {
+	original := ConfigResponse{
+		NonSelectableOutbounds: []string{"proxyless"},
+	}
+
+	data, err := json.Marshal(original)
+	assert.NoError(t, err)
+	// Verify the JSON tag name is present (not an exact substring, which would be
+	// brittle to encoder formatting); the round-trip below verifies the value.
+	assert.Contains(t, string(data), `"non_selectable_outbounds"`)
+
+	var deserialized ConfigResponse
+	err = json.Unmarshal(data, &deserialized)
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"proxyless"}, deserialized.NonSelectableOutbounds)
+
+	// Both nil and a non-nil empty slice should be omitted from JSON.
+	for _, empty := range []ConfigResponse{{}, {NonSelectableOutbounds: []string{}}} {
+		data, err = json.Marshal(empty)
+		assert.NoError(t, err)
+		assert.NotContains(t, string(data), "non_selectable_outbounds")
+	}
+}
+
 func TestConfigResponseDefaultValues(t *testing.T) {
 	resp := ConfigResponse{}
 	if len(resp.Servers) != 0 {
