@@ -14,6 +14,9 @@ const (
 	// Whether or not client-side metrics should be enabled.
 	METRICS = "otel.metrics"
 
+	// Whether or not client-side logs should be enabled.
+	LOGS = "otel.logs"
+
 	// Whether or not users should have the option to launch private servers on GCP.
 	GCP = "private.gcp"
 
