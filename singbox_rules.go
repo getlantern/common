@@ -66,6 +66,9 @@ func (ab AdBlockRules) ToOptions() (option.Rule, []option.RuleSet) {
 			},
 			RuleAction: option.RuleAction{
 				Action: constant.RuleActionTypeReject,
+				RejectOptions: option.RejectActionOptions{
+					Method: constant.RuleActionRejectMethodDefault,
+				},
 			},
 		},
 	}
