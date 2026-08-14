@@ -35,6 +35,19 @@ const (
 	// older client can't surface one as a selectable proxy and route traffic
 	// through it.
 	CapabilityNonSelectableOutbounds = "non_selectable_outbounds"
+
+	// CapabilityTransportModules: the client can install and run a signed
+	// transport-module bundle delivered in its config, and verifies it against a
+	// compiled-in key.
+	//
+	// Needed because ConfigRequest.Modules cannot carry this by itself: it is
+	// omitted when empty, so a client that supports modules but holds none looks
+	// on the wire exactly like a client that cannot use them at all. Without the
+	// capability the server would have to guess, and guessing wrong means either
+	// never bootstrapping a client's first module or sending every client a
+	// module-bearing outbound it will silently skip — with the module's bytes,
+	// which are the expensive part, attached.
+	CapabilityTransportModules = "transport_modules"
 )
 
 type ServerLocation struct {
@@ -153,4 +166,36 @@ type ConfigRequest struct {
 	Capabilities   []string `json:"capabilities,omitempty"`
 	MetricsOptedIn bool     `json:"metrics_opted_in,omitempty"`
 	Version        string   `json:"version,omitempty"`
+
+	// Modules names the signed transport-module bundles the client already
+	// holds, as engine name -> bundle version, so the server can omit bytes it
+	// would otherwise re-send.
+	//
+	// Distinct from Capabilities, which is a set of boolean tokens: this is an
+	// inventory, and its values are what the server compares against. The two
+	// are complementary — CapabilityTransportModules says the client can load a
+	// delivered module at all, and this says which ones it already has. A client
+	// that supports modules but holds none sends the capability and no Modules,
+	// which is exactly the case the server must be able to tell apart from a
+	// client that cannot use them.
+	//
+	// A transport module can be delivered inline in the config itself, which
+	// means it rides every fetch that offers it. The response ETag does not
+	// help: the body is regenerated per request (the bandit re-picks routes),
+	// so it never repeats and never yields a 304. Without this field an inline
+	// module is re-sent on every poll, indefinitely.
+	//
+	// The version rather than a content hash: the client's bundle store already
+	// persists exactly this, and the artifact's own Ed25519 signature is what
+	// authenticates its bytes, so a hash would be a second identity for one
+	// thing.
+	//
+	// This is a hint and never authorization. A client claiming an engine it
+	// cannot actually load simply skips that outbound, so a wrong or dishonest
+	// declaration only degrades that client. Nothing here may gate access, and
+	// omitted bytes must be the only difference it makes.
+	//
+	// Omitted when empty, so a client holding nothing — or one built without
+	// module support — sends exactly what it always sent.
+	Modules map[string]uint32 `json:"modules,omitempty"`
 }

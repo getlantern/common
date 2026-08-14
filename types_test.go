@@ -80,6 +80,42 @@ func TestConfigRequestModulesOmittedWhenEmpty(t *testing.T) {
 	}
 	assert.Equal(t, map[string]uint32{"bip324": 3, "obfs-xor": 1}, back.Modules)
 }
+
+// The capability and the inventory answer different questions, and the server
+// needs both: "can this client run a delivered module at all" is not the same as
+// "which ones does it already have". A client that supports modules but holds
+// none is the case that would otherwise be indistinguishable from one that
+// cannot use them, since Modules is omitted when empty.
+func TestTransportModulesCapabilityIsSeparateFromTheInventory(t *testing.T) {
+	supportsButHoldsNone := ConfigRequest{
+		DeviceID:     "d",
+		Capabilities: []string{CapabilityTransportModules},
+	}
+	data, err := json.Marshal(supportsButHoldsNone)
+	if err != nil {
+		t.Fatalf("Failed to serialize ConfigRequest: %v", err)
+	}
+	var out map[string]json.RawMessage
+	if err := json.Unmarshal(data, &out); err != nil {
+		t.Fatalf("Failed to deserialize ConfigRequest: %v", err)
+	}
+	assert.Contains(t, out, "capabilities", "the capability is what says the client can run a module")
+	assert.NotContains(t, out, "modules", "holding none must still omit the inventory")
+
+	// And a client that cannot use modules sends neither, so the server can tell
+	// the two apart — which is the whole point of the capability.
+	data, err = json.Marshal(ConfigRequest{DeviceID: "d"})
+	if err != nil {
+		t.Fatalf("Failed to serialize ConfigRequest: %v", err)
+	}
+	out = nil
+	if err := json.Unmarshal(data, &out); err != nil {
+		t.Fatalf("Failed to deserialize ConfigRequest: %v", err)
+	}
+	assert.NotContains(t, out, "capabilities")
+	assert.NotContains(t, out, "modules")
+}
+
 func TestConfigResponseSerialization(t *testing.T) {
 	original := ConfigResponse{
 		Servers: []ServerLocation{
