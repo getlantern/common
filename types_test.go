@@ -59,21 +59,46 @@ func TestConfigRequestDefaultValues(t *testing.T) {
 // field existed. The declaration is an optimization; it must not become a way to
 // tell an older client from a newer one, nor a reason to treat them differently.
 func TestConfigRequestModulesOmittedWhenEmpty(t *testing.T) {
-	data, err := json.Marshal(ConfigRequest{DeviceID: "d"})
-	if err != nil {
-		t.Fatalf("Failed to serialize ConfigRequest: %v", err)
+	// Decode and look for the key rather than substring-searching the JSON: a search for "modules"
+	// would also match the word appearing inside some other field's value, so it could pass for the
+	// wrong reason. The property under test is "no such key".
+	keys := func(t *testing.T, req ConfigRequest) map[string]json.RawMessage {
+		t.Helper()
+		data, err := json.Marshal(req)
+		if err != nil {
+			t.Fatalf("Failed to serialize ConfigRequest: %v", err)
+		}
+		var out map[string]json.RawMessage
+		if err := json.Unmarshal(data, &out); err != nil {
+			t.Fatalf("Failed to deserialize ConfigRequest: %v", err)
+		}
+		return out
 	}
-	assert.NotContains(t, string(data), "modules", "an empty Modules map must be omitted entirely")
 
-	data, err = json.Marshal(ConfigRequest{
+	// Both empties, because they are different values that must behave the same. `omitempty` drops a
+	// map of length zero, so nil and an initialized-but-empty map are equivalent *today* — asserting
+	// only the nil case would let a later change to the tag or the field's type break the other
+	// silently, which is exactly the kind of gap this test exists to close.
+	for name, modules := range map[string]map[string]uint32{
+		"nil":   nil,
+		"empty": {},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.NotContains(t, keys(t, ConfigRequest{DeviceID: "d", Modules: modules}), "modules",
+				"a client holding no modules must send no `modules` key at all")
+		})
+	}
+
+	held := ConfigRequest{
 		DeviceID: "d",
 		Modules:  map[string]uint32{"bip324": 3, "obfs-xor": 1},
-	})
+	}
+	assert.JSONEq(t, `{"bip324":3,"obfs-xor":1}`, string(keys(t, held)["modules"]))
+
+	data, err := json.Marshal(held)
 	if err != nil {
 		t.Fatalf("Failed to serialize ConfigRequest: %v", err)
 	}
-	assert.Contains(t, string(data), `"modules":{"bip324":3,"obfs-xor":1}`)
-
 	var back ConfigRequest
 	if err := json.Unmarshal(data, &back); err != nil {
 		t.Fatalf("Failed to deserialize ConfigRequest: %v", err)
