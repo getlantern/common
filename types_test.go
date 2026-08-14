@@ -48,9 +48,37 @@ func TestConfigRequestDefaultValues(t *testing.T) {
 	if req.DeviceID != "" {
 		t.Errorf("Expected default DeviceID to be empty, got: %s", req.DeviceID)
 	}
-	if req.PreferredLocation.Country != "" {
-		t.Errorf("Expected default PreferredLocation.Country to be empty, got: %s", req.PreferredLocation.Country)
+	// PreferredLocation is a pointer, so its zero value is nil — dereferencing it
+	// to read .Country panics rather than testing anything.
+	if req.PreferredLocation != nil {
+		t.Errorf("Expected default PreferredLocation to be nil, got: %+v", req.PreferredLocation)
 	}
+}
+
+// A client holding no modules must serialize to exactly what it did before the
+// field existed. The declaration is an optimization; it must not become a way to
+// tell an older client from a newer one, nor a reason to treat them differently.
+func TestConfigRequestModulesOmittedWhenEmpty(t *testing.T) {
+	data, err := json.Marshal(ConfigRequest{DeviceID: "d"})
+	if err != nil {
+		t.Fatalf("Failed to serialize ConfigRequest: %v", err)
+	}
+	assert.NotContains(t, string(data), "modules", "an empty Modules map must be omitted entirely")
+
+	data, err = json.Marshal(ConfigRequest{
+		DeviceID: "d",
+		Modules:  map[string]uint32{"bip324": 3, "obfs-xor": 1},
+	})
+	if err != nil {
+		t.Fatalf("Failed to serialize ConfigRequest: %v", err)
+	}
+	assert.Contains(t, string(data), `"modules":{"bip324":3,"obfs-xor":1}`)
+
+	var back ConfigRequest
+	if err := json.Unmarshal(data, &back); err != nil {
+		t.Fatalf("Failed to deserialize ConfigRequest: %v", err)
+	}
+	assert.Equal(t, map[string]uint32{"bip324": 3, "obfs-xor": 1}, back.Modules)
 }
 func TestConfigResponseSerialization(t *testing.T) {
 	original := ConfigResponse{
