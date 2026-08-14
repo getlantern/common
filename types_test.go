@@ -48,10 +48,99 @@ func TestConfigRequestDefaultValues(t *testing.T) {
 	if req.DeviceID != "" {
 		t.Errorf("Expected default DeviceID to be empty, got: %s", req.DeviceID)
 	}
-	if req.PreferredLocation.Country != "" {
-		t.Errorf("Expected default PreferredLocation.Country to be empty, got: %s", req.PreferredLocation.Country)
+	// PreferredLocation is a pointer, so its zero value is nil — dereferencing it
+	// to read .Country panics rather than testing anything.
+	if req.PreferredLocation != nil {
+		t.Errorf("Expected default PreferredLocation to be nil, got: %+v", req.PreferredLocation)
 	}
 }
+
+// A client holding no modules must serialize to exactly what it did before the
+// field existed. The declaration is an optimization; it must not become a way to
+// tell an older client from a newer one, nor a reason to treat them differently.
+func TestConfigRequestModulesOmittedWhenEmpty(t *testing.T) {
+	// Decode and look for the key rather than substring-searching the JSON: a search for "modules"
+	// would also match the word appearing inside some other field's value, so it could pass for the
+	// wrong reason. The property under test is "no such key".
+	keys := func(t *testing.T, req ConfigRequest) map[string]json.RawMessage {
+		t.Helper()
+		data, err := json.Marshal(req)
+		if err != nil {
+			t.Fatalf("Failed to serialize ConfigRequest: %v", err)
+		}
+		var out map[string]json.RawMessage
+		if err := json.Unmarshal(data, &out); err != nil {
+			t.Fatalf("Failed to deserialize ConfigRequest: %v", err)
+		}
+		return out
+	}
+
+	// Both empties, because they are different values that must behave the same. `omitempty` drops a
+	// map of length zero, so nil and an initialized-but-empty map are equivalent *today* — asserting
+	// only the nil case would let a later change to the tag or the field's type break the other
+	// silently, which is exactly the kind of gap this test exists to close.
+	for name, modules := range map[string]map[string]uint32{
+		"nil":   nil,
+		"empty": {},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.NotContains(t, keys(t, ConfigRequest{DeviceID: "d", Modules: modules}), "modules",
+				"a client holding no modules must send no `modules` key at all")
+		})
+	}
+
+	held := ConfigRequest{
+		DeviceID: "d",
+		Modules:  map[string]uint32{"bip324": 3, "obfs-xor": 1},
+	}
+	assert.JSONEq(t, `{"bip324":3,"obfs-xor":1}`, string(keys(t, held)["modules"]))
+
+	data, err := json.Marshal(held)
+	if err != nil {
+		t.Fatalf("Failed to serialize ConfigRequest: %v", err)
+	}
+	var back ConfigRequest
+	if err := json.Unmarshal(data, &back); err != nil {
+		t.Fatalf("Failed to deserialize ConfigRequest: %v", err)
+	}
+	assert.Equal(t, map[string]uint32{"bip324": 3, "obfs-xor": 1}, back.Modules)
+}
+
+// The capability and the inventory answer different questions, and the server
+// needs both: "can this client run a delivered module at all" is not the same as
+// "which ones does it already have". A client that supports modules but holds
+// none is the case that would otherwise be indistinguishable from one that
+// cannot use them, since Modules is omitted when empty.
+func TestTransportModulesCapabilityIsSeparateFromTheInventory(t *testing.T) {
+	supportsButHoldsNone := ConfigRequest{
+		DeviceID:     "d",
+		Capabilities: []string{CapabilityTransportModules},
+	}
+	data, err := json.Marshal(supportsButHoldsNone)
+	if err != nil {
+		t.Fatalf("Failed to serialize ConfigRequest: %v", err)
+	}
+	var out map[string]json.RawMessage
+	if err := json.Unmarshal(data, &out); err != nil {
+		t.Fatalf("Failed to deserialize ConfigRequest: %v", err)
+	}
+	assert.Contains(t, out, "capabilities", "the capability is what says the client can run a module")
+	assert.NotContains(t, out, "modules", "holding none must still omit the inventory")
+
+	// And a client that cannot use modules sends neither, so the server can tell
+	// the two apart — which is the whole point of the capability.
+	data, err = json.Marshal(ConfigRequest{DeviceID: "d"})
+	if err != nil {
+		t.Fatalf("Failed to serialize ConfigRequest: %v", err)
+	}
+	out = nil
+	if err := json.Unmarshal(data, &out); err != nil {
+		t.Fatalf("Failed to deserialize ConfigRequest: %v", err)
+	}
+	assert.NotContains(t, out, "capabilities")
+	assert.NotContains(t, out, "modules")
+}
+
 func TestConfigResponseSerialization(t *testing.T) {
 	original := ConfigResponse{
 		Servers: []ServerLocation{
