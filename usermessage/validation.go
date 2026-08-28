@@ -32,8 +32,8 @@ func (r UserMessageRequest) Validate() error {
 	if err := validateSingleLine("app_version", r.AppVersion, MaxAppVersionLength, true); err != nil {
 		return err
 	}
-	if r.Capability != CapabilityUserMessagesV1 {
-		return invalid("capability", fmt.Sprintf("must be %q", CapabilityUserMessagesV1))
+	if err := r.Capabilities.Validate(); err != nil {
+		return err
 	}
 	if len(r.SeenDisplayIDs) > MaxSeenDisplayIDs {
 		return invalid("seen_display_ids", fmt.Sprintf("must contain at most %d entries", MaxSeenDisplayIDs))
@@ -49,6 +49,53 @@ func (r UserMessageRequest) Validate() error {
 			return invalid(field, "must not duplicate another display ID")
 		}
 		seen[id] = struct{}{}
+	}
+	return nil
+}
+
+// Validate checks whether c describes a supported, internally consistent
+// client feature set for this wire version.
+func (c ClientCapabilities) Validate() error {
+	if c.Version != CapabilityUserMessagesV1 {
+		return invalid("capabilities.version", fmt.Sprintf("must be %q", CapabilityUserMessagesV1))
+	}
+	if len(c.Surfaces) == 0 {
+		return invalid("capabilities.surfaces", "must contain at least one surface")
+	}
+	if len(c.Surfaces) > MaxSupportedSurfaces {
+		return invalid(
+			"capabilities.surfaces",
+			fmt.Sprintf("must contain at most %d entries", MaxSupportedSurfaces),
+		)
+	}
+	seenSurfaces := make(map[Surface]struct{}, len(c.Surfaces))
+	for i, surface := range c.Surfaces {
+		field := fmt.Sprintf("capabilities.surfaces[%d]", i)
+		if !surface.Valid() {
+			return invalid(field, fmt.Sprintf("unsupported value %q", surface))
+		}
+		if _, found := seenSurfaces[surface]; found {
+			return invalid(field, "must not duplicate another surface")
+		}
+		seenSurfaces[surface] = struct{}{}
+	}
+
+	if len(c.Actions) > MaxSupportedActions {
+		return invalid(
+			"capabilities.actions",
+			fmt.Sprintf("must contain at most %d entries", MaxSupportedActions),
+		)
+	}
+	seenActions := make(map[ActionType]struct{}, len(c.Actions))
+	for i, action := range c.Actions {
+		field := fmt.Sprintf("capabilities.actions[%d]", i)
+		if !action.Valid() {
+			return invalid(field, fmt.Sprintf("unsupported value %q", action))
+		}
+		if _, found := seenActions[action]; found {
+			return invalid(field, "must not duplicate another action")
+		}
+		seenActions[action] = struct{}{}
 	}
 	return nil
 }

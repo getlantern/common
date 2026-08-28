@@ -18,7 +18,12 @@ func TestV1JSONFixturesRoundTrip(t *testing.T) {
 		var request UserMessageRequest
 		require.NoError(t, json.Unmarshal(fixture, &request))
 		require.NoError(t, request.Validate())
-		assert.Equal(t, CapabilityUserMessagesV1, request.Capability)
+		assert.Equal(t, CapabilityUserMessagesV1, request.Capabilities.Version)
+		assert.Equal(t, []Surface{SurfaceSnackbar}, request.Capabilities.Surfaces)
+		assert.Equal(t, []ActionType{
+			ActionTypeOpenHTTPSURL,
+			ActionTypeOpenPlans,
+		}, request.Capabilities.Actions)
 		assert.Equal(t, "fa-IR", request.Locale)
 		assert.Equal(t, []string{
 			"campaign-018f:generation-1",
@@ -117,11 +122,49 @@ func TestRequestValidation(t *testing.T) {
 			field: "app_version",
 		},
 		{
-			name: "wrong capability",
+			name: "wrong capability version",
 			mutate: func(r *UserMessageRequest) {
-				r.Capability = "user_messages_v2"
+				r.Capabilities.Version = "user_messages_v2"
 			},
-			field: "capability",
+			field: "capabilities.version",
+		},
+		{
+			name: "missing supported surfaces",
+			mutate: func(r *UserMessageRequest) {
+				r.Capabilities.Surfaces = nil
+			},
+			field: "capabilities.surfaces",
+		},
+		{
+			name: "unknown supported surface",
+			mutate: func(r *UserMessageRequest) {
+				r.Capabilities.Surfaces = []Surface{"future_surface"}
+			},
+			field: "capabilities.surfaces[0]",
+		},
+		{
+			name: "duplicate supported surface",
+			mutate: func(r *UserMessageRequest) {
+				r.Capabilities.Surfaces = []Surface{SurfaceSnackbar, SurfaceSnackbar}
+			},
+			field: "capabilities.surfaces[1]",
+		},
+		{
+			name: "unknown supported action",
+			mutate: func(r *UserMessageRequest) {
+				r.Capabilities.Actions = []ActionType{"future_action"}
+			},
+			field: "capabilities.actions[0]",
+		},
+		{
+			name: "duplicate supported action",
+			mutate: func(r *UserMessageRequest) {
+				r.Capabilities.Actions = []ActionType{
+					ActionTypeOpenPlans,
+					ActionTypeOpenPlans,
+				}
+			},
+			field: "capabilities.actions[1]",
 		},
 		{
 			name: "too many seen IDs",
@@ -395,10 +438,14 @@ func TestValidationErrorSupportsErrorsAs(t *testing.T) {
 
 func validRequest() UserMessageRequest {
 	return UserMessageRequest{
-		Locale:         "en-US",
-		Platform:       "android",
-		AppVersion:     "9.2.1",
-		Capability:     CapabilityUserMessagesV1,
+		Locale:     "en-US",
+		Platform:   "android",
+		AppVersion: "9.2.1",
+		Capabilities: ClientCapabilities{
+			Version:  CapabilityUserMessagesV1,
+			Surfaces: []Surface{SurfaceSnackbar},
+			Actions:  []ActionType{ActionTypeOpenHTTPSURL, ActionTypeOpenPlans},
+		},
 		SeenDisplayIDs: []string{"campaign-1:generation-1"},
 	}
 }

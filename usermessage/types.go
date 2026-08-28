@@ -25,6 +25,8 @@ const (
 	MaxMessageBodyLength  = 2048
 	MaxButtonLabelLength  = 128
 	MaxActionURLLength    = 2048
+	MaxSupportedSurfaces  = 16
+	MaxSupportedActions   = 32
 )
 
 // Surface identifies how a resolved message should be presented. Consumers
@@ -44,15 +46,23 @@ const (
 	ActionTypeOpenPlans    ActionType = "open_plans"
 )
 
+// ClientCapabilities identifies the wire version and presentation features
+// that the requesting client can safely handle.
+type ClientCapabilities struct {
+	Version  string       `json:"version"`
+	Surfaces []Surface    `json:"surfaces"`
+	Actions  []ActionType `json:"actions,omitempty"`
+}
+
 // UserMessageRequest contains only the client context needed to resolve a
 // message. Authentication and canonical user identity are supplied by the
 // transport/account layer, not asserted in this payload.
 type UserMessageRequest struct {
-	Locale         string   `json:"locale"`
-	Platform       string   `json:"platform"`
-	AppVersion     string   `json:"app_version"`
-	Capability     string   `json:"capability"`
-	SeenDisplayIDs []string `json:"seen_display_ids,omitempty"`
+	Locale         string             `json:"locale"`
+	Platform       string             `json:"platform"`
+	AppVersion     string             `json:"app_version"`
+	Capabilities   ClientCapabilities `json:"capabilities"`
+	SeenDisplayIDs []string           `json:"seen_display_ids,omitempty"`
 }
 
 // UserMessageResponse contains at most one resolved message. A nil Message
