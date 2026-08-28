@@ -6,6 +6,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"golang.org/x/text/language"
 )
 
 // ValidationError identifies the invalid wire-contract field and why it was
@@ -205,32 +207,11 @@ func validateLocale(field, value string) error {
 	if err := validateSingleLine(field, value, MaxLocaleLength, true); err != nil {
 		return err
 	}
-	if strings.HasPrefix(value, "-") || strings.HasSuffix(value, "-") {
+	if strings.ContainsRune(value, '_') {
 		return invalid(field, "must be a BCP 47 language tag")
 	}
-	parts := strings.Split(value, "-")
-	if len(parts) == 1 && (strings.EqualFold(parts[0], "x") || strings.EqualFold(parts[0], "i")) {
-		return invalid(field, "must include a subtag after the private-use or grandfathered prefix")
-	}
-	for i, part := range parts {
-		if len(part) == 0 || len(part) > 8 {
-			return invalid(field, "must be a BCP 47 language tag")
-		}
-		for _, r := range part {
-			if r > unicode.MaxASCII || !unicode.IsLetter(r) && !unicode.IsDigit(r) {
-				return invalid(field, "must contain only BCP 47 subtags")
-			}
-		}
-		if i == 0 {
-			if len(part) < 2 && !strings.EqualFold(part, "x") && !strings.EqualFold(part, "i") {
-				return invalid(field, "must begin with a language subtag")
-			}
-			for _, r := range part {
-				if !unicode.IsLetter(r) {
-					return invalid(field, "must begin with a language subtag")
-				}
-			}
-		}
+	if tag, err := language.Parse(value); err != nil || tag == language.Und {
+		return invalid(field, "must be a BCP 47 language tag")
 	}
 	return nil
 }

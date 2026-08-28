@@ -108,6 +108,20 @@ func TestRequestValidation(t *testing.T) {
 			field: "locale",
 		},
 		{
+			name: "extension without value",
+			mutate: func(r *UserMessageRequest) {
+				r.Locale = "en-a"
+			},
+			field: "locale",
+		},
+		{
+			name: "numeric extension without value",
+			mutate: func(r *UserMessageRequest) {
+				r.Locale = "en-1"
+			},
+			field: "locale",
+		},
+		{
 			name: "missing platform",
 			mutate: func(r *UserMessageRequest) {
 				r.Platform = ""
@@ -202,7 +216,7 @@ func TestRequestValidation(t *testing.T) {
 func TestRequestMaximumLengths(t *testing.T) {
 	t.Run("locale", func(t *testing.T) {
 		request := validRequest()
-		request.Locale = "aa-aaaaaaaa-aaaaaaaa-aaaaaaaa-aaaaaaaa-aaaaaaaa-aaaaaaaa-aaaaaaa"
+		request.Locale = "en-x-aaaaaaaa-aaaaaaaa-aaaaaaaa-aaaaaaaa-aaaaaaaa-aaaaaaaa-aaaaa"
 		require.Len(t, request.Locale, MaxLocaleLength)
 		require.NoError(t, request.Validate())
 
