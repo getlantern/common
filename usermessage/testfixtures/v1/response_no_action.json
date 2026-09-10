@@ -1,0 +1,13 @@
+{
+  "message": {
+    "display_id": "campaign-0192:generation-1",
+    "campaign_id": "0192d9ad-8b1c-7d5a-a70d-e4f2f744c51a",
+    "revision_id": "0192d9ae-05e1-70e2-924d-acde79344744",
+    "delivery_id": "0192d9ae-612c-7ddc-95ac-f1587b557e68",
+    "surface": "snackbar",
+    "locale": "en-US",
+    "body": "Lantern maintenance is complete.",
+    "expires_at": "2026-09-02T00:00:00Z"
+  },
+  "poll_interval_seconds": 300
+}
