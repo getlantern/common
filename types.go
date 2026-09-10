@@ -1,6 +1,11 @@
 package common
 
-import O "github.com/sagernet/sing-box/option"
+import (
+	"slices"
+	"strings"
+
+	O "github.com/sagernet/sing-box/option"
+)
 
 const SINGBOX = "sing-box"
 
@@ -98,6 +103,39 @@ type UnboundedConfig struct {
 	CTableSize        int      `json:"ctable_size,omitempty"`
 	PTableSize        int      `json:"ptable_size,omitempty"`
 	STUNServers       []string `json:"stun_servers,omitempty"`
+}
+
+// Equal reports whether both configurations have the same effective donor settings.
+// STUN order, duplicates, and surrounding whitespace are ignored; empty pools use defaults.
+// A nil configuration equals only another nil configuration.
+func (a *UnboundedConfig) Equal(b *UnboundedConfig) bool {
+	if a == b {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return a.DiscoverySrv == b.DiscoverySrv && a.DiscoveryEndpoint == b.DiscoveryEndpoint &&
+		a.EgressAddr == b.EgressAddr && a.EgressEndpoint == b.EgressEndpoint &&
+		a.CTableSize == b.CTableSize && a.PTableSize == b.PTableSize &&
+		slices.Equal(NormalizeDonorSTUNServers(a.STUNServers), NormalizeDonorSTUNServers(b.STUNServers))
+}
+
+// NormalizeDonorSTUNServers returns a fresh, sorted pool with whitespace and duplicates removed.
+// Pools without nonblank entries use DefaultDonorSTUNServers.
+func NormalizeDonorSTUNServers(servers []string) []string {
+	pool := make([]string, 0, len(servers))
+	for _, server := range servers {
+		server = strings.TrimSpace(server)
+		if server != "" && !slices.Contains(pool, server) {
+			pool = append(pool, server)
+		}
+	}
+	if len(pool) == 0 {
+		pool = DefaultDonorSTUNServers()
+	}
+	slices.Sort(pool)
+	return pool
 }
 
 // DefaultDonorSTUNServers returns a fresh fallback pool that requires no DNS lookup.

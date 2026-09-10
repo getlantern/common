@@ -291,3 +291,56 @@ func TestDonorSTUNConfigOmission(t *testing.T) {
 		assert.JSONEq(t, "{}", string(encoded))
 	}
 }
+
+func TestUnboundedConfigEqual(t *testing.T) {
+	var absent *UnboundedConfig
+	assert.True(t, absent.Equal(nil))
+	assert.False(t, absent.Equal(&UnboundedConfig{}))
+	assert.False(t, (&UnboundedConfig{}).Equal(nil))
+	base := UnboundedConfig{
+		DiscoverySrv: "discovery", DiscoveryEndpoint: "/discover",
+		EgressAddr: "egress", EgressEndpoint: "/egress",
+		CTableSize: 1, PTableSize: 2,
+		STUNServers: []string{"stun:192.0.2.1:3478", "stun:192.0.2.2:3478"},
+	}
+	assert.True(t, base.Equal(&base))
+	copy := base
+	assert.True(t, base.Equal(&copy))
+	copy.STUNServers = []string{" stun:192.0.2.2:3478 ", "", "stun:192.0.2.1:3478", "stun:192.0.2.1:3478"}
+	assert.True(t, base.Equal(&copy))
+	for name, mutate := range map[string]func(*UnboundedConfig){
+		"discovery server":   func(c *UnboundedConfig) { c.DiscoverySrv += "changed" },
+		"discovery endpoint": func(c *UnboundedConfig) { c.DiscoveryEndpoint += "changed" },
+		"egress address":     func(c *UnboundedConfig) { c.EgressAddr += "changed" },
+		"egress endpoint":    func(c *UnboundedConfig) { c.EgressEndpoint += "changed" },
+		"consumer table":     func(c *UnboundedConfig) { c.CTableSize++ },
+		"producer table":     func(c *UnboundedConfig) { c.PTableSize++ },
+		"STUN pool":          func(c *UnboundedConfig) { c.STUNServers = []string{"stun:192.0.2.3:3478"} },
+	} {
+		t.Run(name, func(t *testing.T) {
+			changed := base
+			mutate(&changed)
+			assert.False(t, base.Equal(&changed))
+			assert.False(t, changed.Equal(&base))
+		})
+	}
+	for _, servers := range [][]string{nil, {}, {"", " \t"}, DefaultDonorSTUNServers()} {
+		assert.True(t, (&UnboundedConfig{}).Equal(&UnboundedConfig{STUNServers: servers}))
+	}
+}
+
+func TestNormalizeDonorSTUNServers(t *testing.T) {
+	input := []string{" stun:192.0.2.2:3478 ", "stun:192.0.2.1:3478", "", "stun:192.0.2.2:3478"}
+	original := append([]string(nil), input...)
+	pool := NormalizeDonorSTUNServers(input)
+	assert.Equal(t, []string{"stun:192.0.2.1:3478", "stun:192.0.2.2:3478"}, pool)
+	assert.Equal(t, original, input)
+	pool[0] = "changed"
+	assert.Equal(t, original, input)
+	for _, empty := range [][]string{nil, {}, {"", " \t"}} {
+		pool = NormalizeDonorSTUNServers(empty)
+		assert.ElementsMatch(t, DefaultDonorSTUNServers(), pool)
+		pool[0] = "changed"
+		assert.NotContains(t, NormalizeDonorSTUNServers(empty), "changed")
+	}
+}
