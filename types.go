@@ -91,12 +91,27 @@ type RuleSet struct {
 }
 
 type UnboundedConfig struct {
-	DiscoverySrv      string `json:"discovery_srv,omitempty"`
-	DiscoveryEndpoint string `json:"discovery_endpoint,omitempty"`
-	EgressAddr        string `json:"egress_addr,omitempty"`
-	EgressEndpoint    string `json:"egress_endpoint,omitempty"`
-	CTableSize        int    `json:"ctable_size,omitempty"`
-	PTableSize        int    `json:"ptable_size,omitempty"`
+	DiscoverySrv      string   `json:"discovery_srv,omitempty"`
+	DiscoveryEndpoint string   `json:"discovery_endpoint,omitempty"`
+	EgressAddr        string   `json:"egress_addr,omitempty"`
+	EgressEndpoint    string   `json:"egress_endpoint,omitempty"`
+	CTableSize        int      `json:"ctable_size,omitempty"`
+	PTableSize        int      `json:"ptable_size,omitempty"`
+	STUNServers       []string `json:"stun_servers,omitempty"`
+}
+
+// DefaultDonorSTUNServers returns a fresh fallback pool that requires no DNS lookup.
+func DefaultDonorSTUNServers() []string {
+	return []string{
+		"stun:5.39.72.109:3478",
+		"stun:176.9.24.184:3478",
+		"stun:20.93.239.169:3478",
+		"stun:46.225.95.169:3478",
+		"stun:136.243.59.79:3478",
+		"stun:199.4.110.11:3478",
+		"stun:203.56.114.226:3478",
+		"stun:35.158.233.7:3478",
+	}
 }
 
 type ConfigResponse struct {

@@ -269,3 +269,14 @@ func TestConfigResponseDefaultValues(t *testing.T) {
 		t.Errorf("Expected default OutboundLocations to be empty, got: %+v", resp.OutboundLocations)
 	}
 }
+
+func TestDonorSTUNConfigRoundTrip(t *testing.T) {
+	original := UnboundedConfig{STUNServers: DefaultDonorSTUNServers()}
+	encoded, err := json.Marshal(original)
+	assert.NoError(t, err)
+	var decoded UnboundedConfig
+	assert.NoError(t, json.Unmarshal(encoded, &decoded))
+	assert.Equal(t, original.STUNServers, decoded.STUNServers)
+	original.STUNServers[0] = "changed"
+	assert.NotContains(t, DefaultDonorSTUNServers(), "changed")
+}
