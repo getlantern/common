@@ -121,7 +121,7 @@ func (a *UnboundedConfig) Equal(b *UnboundedConfig) bool {
 		slices.Equal(NormalizeDonorSTUNServers(a.STUNServers), NormalizeDonorSTUNServers(b.STUNServers))
 }
 
-// NormalizeDonorSTUNServers returns a fresh, sorted pool with whitespace and duplicates removed.
+// NormalizeDonorSTUNServers returns a fresh, sorted pool with surrounding whitespace, blank entries, and duplicates removed.
 // Pools without nonblank entries use DefaultDonorSTUNServers.
 func NormalizeDonorSTUNServers(servers []string) []string {
 	pool := make([]string, 0, len(servers))
