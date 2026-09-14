@@ -8,6 +8,7 @@ require (
 	github.com/sagernet/sing v0.7.13
 	github.com/sagernet/sing-box v1.12.13
 	github.com/stretchr/testify v1.10.0
+	golang.org/x/text v0.28.0
 	google.golang.org/protobuf v1.36.6
 )
 

@@ -1,0 +1,18 @@
+{
+  "message": {
+    "display_id": "campaign-0191:generation-2",
+    "campaign_id": "0191d9ad-8b1c-7d5a-a70d-e4f2f744c51a",
+    "revision_id": "0191d9ae-05e1-70e2-924d-acde79344744",
+    "delivery_id": "0191d9ae-612c-7ddc-95ac-f1587b557e68",
+    "surface": "snackbar",
+    "locale": "fa-IR",
+    "body": "به ما بگویید تجربه شما از لنترن چگونه بوده است.",
+    "button_label": "شرکت در نظرسنجی",
+    "action": {
+      "type": "open_https_url",
+      "url": "https://example.com/survey?campaign=0191"
+    },
+    "expires_at": "2026-09-01T00:00:00Z"
+  },
+  "poll_interval_seconds": 300
+}

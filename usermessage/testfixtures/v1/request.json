@@ -1,0 +1,14 @@
+{
+  "locale": "fa-IR",
+  "platform": "android",
+  "app_version": "9.2.1",
+  "capabilities": {
+    "version": "user_messages_v1",
+    "surfaces": ["snackbar"],
+    "actions": ["open_https_url", "open_plans"]
+  },
+  "seen_display_ids": [
+    "campaign-018f:generation-1",
+    "campaign-0190:generation-3"
+  ]
+}

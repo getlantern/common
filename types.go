@@ -1,6 +1,11 @@
 package common
 
-import O "github.com/sagernet/sing-box/option"
+import (
+	"slices"
+	"strings"
+
+	O "github.com/sagernet/sing-box/option"
+)
 
 const SINGBOX = "sing-box"
 
@@ -91,12 +96,60 @@ type RuleSet struct {
 }
 
 type UnboundedConfig struct {
-	DiscoverySrv      string `json:"discovery_srv,omitempty"`
-	DiscoveryEndpoint string `json:"discovery_endpoint,omitempty"`
-	EgressAddr        string `json:"egress_addr,omitempty"`
-	EgressEndpoint    string `json:"egress_endpoint,omitempty"`
-	CTableSize        int    `json:"ctable_size,omitempty"`
-	PTableSize        int    `json:"ptable_size,omitempty"`
+	DiscoverySrv      string   `json:"discovery_srv,omitempty"`
+	DiscoveryEndpoint string   `json:"discovery_endpoint,omitempty"`
+	EgressAddr        string   `json:"egress_addr,omitempty"`
+	EgressEndpoint    string   `json:"egress_endpoint,omitempty"`
+	CTableSize        int      `json:"ctable_size,omitempty"`
+	PTableSize        int      `json:"ptable_size,omitempty"`
+	STUNServers       []string `json:"stun_servers,omitempty"`
+}
+
+// Equal reports whether both configurations have the same effective donor settings.
+// STUN order, duplicates, and surrounding whitespace are ignored; empty pools use defaults.
+// A nil configuration equals only another nil configuration.
+func (a *UnboundedConfig) Equal(b *UnboundedConfig) bool {
+	if a == b {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return a.DiscoverySrv == b.DiscoverySrv && a.DiscoveryEndpoint == b.DiscoveryEndpoint &&
+		a.EgressAddr == b.EgressAddr && a.EgressEndpoint == b.EgressEndpoint &&
+		a.CTableSize == b.CTableSize && a.PTableSize == b.PTableSize &&
+		slices.Equal(NormalizeDonorSTUNServers(a.STUNServers), NormalizeDonorSTUNServers(b.STUNServers))
+}
+
+// NormalizeDonorSTUNServers returns a fresh, sorted pool with surrounding whitespace, blank entries, and duplicates removed.
+// Pools without nonblank entries use DefaultDonorSTUNServers.
+func NormalizeDonorSTUNServers(servers []string) []string {
+	pool := make([]string, 0, len(servers))
+	for _, server := range servers {
+		server = strings.TrimSpace(server)
+		if server != "" && !slices.Contains(pool, server) {
+			pool = append(pool, server)
+		}
+	}
+	if len(pool) == 0 {
+		pool = DefaultDonorSTUNServers()
+	}
+	slices.Sort(pool)
+	return pool
+}
+
+// DefaultDonorSTUNServers returns a fresh fallback pool that requires no DNS lookup.
+func DefaultDonorSTUNServers() []string {
+	return []string{
+		"stun:5.39.72.109:3478",
+		"stun:176.9.24.184:3478",
+		"stun:20.93.239.169:3478",
+		"stun:46.225.95.169:3478",
+		"stun:136.243.59.79:3478",
+		"stun:199.4.110.11:3478",
+		"stun:203.56.114.226:3478",
+		"stun:35.158.233.7:3478",
+	}
 }
 
 type ConfigResponse struct {
