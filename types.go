@@ -163,6 +163,9 @@ type ConfigResponse struct {
 	SmartRouting      SmartRoutingRules `json:"smart_routing,omitempty"`
 	AdBlock           AdBlockRules      `json:"ad_block,omitempty"`
 
+	// EvalProxies contains outbounds for evaluation, separate from user traffic.
+	EvalProxies []O.Outbound `json:"eval_proxies,omitempty"`
+
 	// NonSelectableOutbounds lists the tags of outbounds in Options that are
 	// infrastructure (e.g. a proxyless download_detour for rule-set fetches). The
 	// client merges them into its box config so references (download_detour, route
