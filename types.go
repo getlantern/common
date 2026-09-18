@@ -53,6 +53,19 @@ const (
 	// module-bearing outbound it will silently skip — with the module's bytes,
 	// which are the expensive part, attached.
 	CapabilityTransportModules = "transport_modules"
+
+	// CapabilityIPv6: the client has verified it has a working IPv6 route to
+	// the internet and can dial an IPv6-only endpoint.
+	//
+	// Some proxy tracks provision VPS routes with only an IPv6 address, never
+	// a v4 fallback, so the server gates those routes on this capability — a
+	// client that hasn't confirmed IPv6 reachability would otherwise be
+	// handed an address it can never dial. A client should only advertise
+	// this after an actual reachability check (e.g. a probe dial), not just
+	// because its OS or network stack has an IPv6 interface configured: an
+	// IPv6-capable OS on a v4-only network still cannot reach a v6-only
+	// route.
+	CapabilityIPv6 = "ipv6"
 )
 
 type ServerLocation struct {
