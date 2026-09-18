@@ -27,11 +27,10 @@ type Backoff struct {
 
 // NewBackoff creates a quadratic backoff with delays of baseWait*n*n for
 // consecutive failures n starting at 1, jittered by +/-20% and capped at maxWait.
-// Nonpositive baseWait defaults to 10ms.
+// baseWait is floored at 10ms; maxWait is floored at the resulting baseWait.
 func NewBackoff(baseWait, maxWait time.Duration) *Backoff {
-	if baseWait <= 0 {
-		baseWait = defaultBaseWait
-	}
+	baseWait = max(baseWait, defaultBaseWait)
+	maxWait = max(maxWait, baseWait)
 	return &Backoff{
 		baseWait: baseWait,
 		maxWait:  maxWait,
@@ -39,7 +38,8 @@ func NewBackoff(baseWait, maxWait time.Duration) *Backoff {
 }
 
 // NewExponentialBackoff creates a backoff that doubles the base wait with each
-// failure, starting at baseWait. Nonpositive baseWait defaults to 10ms.
+// failure, starting at baseWait.
+// baseWait is floored at 10ms; maxWait is floored at the resulting baseWait.
 func NewExponentialBackoff(baseWait, maxWait time.Duration) *Backoff {
 	b := NewBackoff(baseWait, maxWait)
 	b.strategy = exponential

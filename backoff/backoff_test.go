@@ -57,6 +57,39 @@ func TestBackoffDefaultBaseWait(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			require.Equal(t, defaultBaseWait, newBackoff(0, time.Minute).nextDelay(0.5))
 			require.Equal(t, defaultBaseWait, newBackoff(-time.Second, time.Minute).nextDelay(0.5))
+			require.Equal(t, defaultBaseWait, newBackoff(time.Millisecond, time.Minute).nextDelay(0.5))
+		})
+	}
+}
+
+func TestBackoffMaxWaitFloor(t *testing.T) {
+	for name, newBackoff := range backoffConstructors {
+		t.Run(name, func(t *testing.T) {
+			for _, tc := range []struct {
+				name    string
+				base    time.Duration
+				max     time.Duration
+				wantMax time.Duration
+			}{
+				{"negative", time.Second, -time.Second, time.Second},
+				{"zero", time.Second, 0, time.Second},
+				{"below base", time.Second, time.Millisecond, time.Second},
+				{"equal base", time.Second, time.Second, time.Second},
+				{"above base", time.Second, time.Minute, time.Minute},
+				{"normalized base", 0, 0, defaultBaseWait},
+				{"subminimum base", time.Millisecond, time.Millisecond, defaultBaseWait},
+			} {
+				t.Run(tc.name, func(t *testing.T) {
+					backoff := newBackoff(tc.base, tc.max)
+					require.Equal(t, tc.wantMax, backoff.maxWait)
+					for range 10 {
+						delay := backoff.nextDelay(0.5)
+						require.Positive(t, delay)
+						require.LessOrEqual(t, delay, tc.wantMax)
+					}
+					require.Equal(t, tc.wantMax, backoff.nextDelay(0.5))
+				})
+			}
 		})
 	}
 }
