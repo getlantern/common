@@ -41,6 +41,9 @@ const (
 	// through it.
 	CapabilityNonSelectableOutbounds = "non_selectable_outbounds"
 
+	// CapabilityOutboundEvaluation indicates support for configuring and running the outbound-eval service.
+	CapabilityOutboundEvaluation = "outbound_evaluation"
+
 	// CapabilityTransportModules: the client can install and run a signed
 	// transport-module bundle delivered in its config, and verifies it against a
 	// compiled-in key.
