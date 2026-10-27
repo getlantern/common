@@ -69,6 +69,16 @@ const (
 	// IPv6-capable OS on a v4-only network still cannot reach a v6-only
 	// route.
 	CapabilityIPv6 = "ipv6"
+
+	// CapabilityUnboundedTuning: the client's Unbounded outbound accepts a
+	// "tuning" option, a map of named overrides for pion's ICE, DTLS and SCTP
+	// defaults, and ignores keys it doesn't recognize.
+	//
+	// The server sends tuning only to clients advertising this. sing-box
+	// rejects unknown outbound fields, so a client that predates the option
+	// would fail to load the whole outbound. Once a client has the option, new
+	// tuning keys need no further capability: an older client skips them.
+	CapabilityUnboundedTuning = "unbounded_tuning"
 )
 
 type ServerLocation struct {
