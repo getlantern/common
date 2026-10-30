@@ -292,6 +292,21 @@ func TestDonorSTUNConfigOmission(t *testing.T) {
 	}
 }
 
+func TestUnboundedTuningRoundTrip(t *testing.T) {
+	original := UnboundedConfig{Tuning: map[string]string{"ice_max_binding_requests": "25"}}
+	encoded, err := json.Marshal(original)
+	assert.NoError(t, err)
+	assert.JSONEq(t, `{"tuning":{"ice_max_binding_requests":"25"}}`, string(encoded))
+	var decoded UnboundedConfig
+	assert.NoError(t, json.Unmarshal(encoded, &decoded))
+	assert.True(t, original.Equal(&decoded))
+	for _, tuning := range []map[string]string{nil, {}} {
+		encoded, err := json.Marshal(UnboundedConfig{Tuning: tuning})
+		assert.NoError(t, err)
+		assert.JSONEq(t, "{}", string(encoded))
+	}
+}
+
 func TestUnboundedConfigEqual(t *testing.T) {
 	var absent *UnboundedConfig
 	assert.True(t, absent.Equal(nil))
@@ -302,6 +317,7 @@ func TestUnboundedConfigEqual(t *testing.T) {
 		EgressAddr: "egress", EgressEndpoint: "/egress",
 		CTableSize: 1, PTableSize: 2,
 		STUNServers: []string{"stun:192.0.2.1:3478", "stun:192.0.2.2:3478"},
+		Tuning:      map[string]string{"ice_max_binding_requests": "25"},
 	}
 	assert.True(t, base.Equal(&base))
 	copy := base
@@ -316,6 +332,8 @@ func TestUnboundedConfigEqual(t *testing.T) {
 		"consumer table":     func(c *UnboundedConfig) { c.CTableSize++ },
 		"producer table":     func(c *UnboundedConfig) { c.PTableSize++ },
 		"STUN pool":          func(c *UnboundedConfig) { c.STUNServers = []string{"stun:192.0.2.3:3478"} },
+		"tuning value":       func(c *UnboundedConfig) { c.Tuning = map[string]string{"ice_max_binding_requests": "50"} },
+		"tuning removed":     func(c *UnboundedConfig) { c.Tuning = nil },
 	} {
 		t.Run(name, func(t *testing.T) {
 			changed := base
@@ -327,6 +345,7 @@ func TestUnboundedConfigEqual(t *testing.T) {
 	for _, servers := range [][]string{nil, {}, {"", " \t"}, DefaultDonorSTUNServers()} {
 		assert.True(t, (&UnboundedConfig{}).Equal(&UnboundedConfig{STUNServers: servers}))
 	}
+	assert.True(t, (&UnboundedConfig{}).Equal(&UnboundedConfig{Tuning: map[string]string{}}))
 }
 
 func TestNormalizeDonorSTUNServers(t *testing.T) {

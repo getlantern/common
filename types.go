@@ -1,6 +1,7 @@
 package common
 
 import (
+	"maps"
 	"slices"
 	"strings"
 
@@ -129,6 +130,10 @@ type UnboundedConfig struct {
 	CTableSize        int      `json:"ctable_size,omitempty"`
 	PTableSize        int      `json:"ptable_size,omitempty"`
 	STUNServers       []string `json:"stun_servers,omitempty"`
+	// Tuning overrides the volunteer's WebRTC defaults, as decimal strings keyed by name, the same
+	// keys as the Unbounded outbound's tuning option (broflake's clientcore.ParseWebRTCTuning).
+	// Clients ignore keys they don't recognize.
+	Tuning map[string]string `json:"tuning,omitempty"`
 }
 
 // Equal reports whether both configurations have the same effective donor settings.
@@ -144,7 +149,8 @@ func (a *UnboundedConfig) Equal(b *UnboundedConfig) bool {
 	return a.DiscoverySrv == b.DiscoverySrv && a.DiscoveryEndpoint == b.DiscoveryEndpoint &&
 		a.EgressAddr == b.EgressAddr && a.EgressEndpoint == b.EgressEndpoint &&
 		a.CTableSize == b.CTableSize && a.PTableSize == b.PTableSize &&
-		slices.Equal(NormalizeDonorSTUNServers(a.STUNServers), NormalizeDonorSTUNServers(b.STUNServers))
+		slices.Equal(NormalizeDonorSTUNServers(a.STUNServers), NormalizeDonorSTUNServers(b.STUNServers)) &&
+		maps.Equal(a.Tuning, b.Tuning)
 }
 
 // NormalizeDonorSTUNServers returns a fresh, sorted pool with surrounding whitespace, blank entries, and duplicates removed.
