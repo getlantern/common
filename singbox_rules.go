@@ -99,7 +99,7 @@ func (rs RuleSets) ToOptions() []option.RuleSet {
 		}
 		rulesets = append(rulesets, option.RuleSet{
 			Type:   constant.RuleSetTypeRemote,
-			Tag:    rule.Tag,
+			Tag:    badoption.Listable[string]{rule.Tag},
 			Format: format,
 			RemoteOptions: option.RemoteRuleSet{
 				URL:            rule.URL,
