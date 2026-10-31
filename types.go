@@ -173,7 +173,6 @@ func NormalizeDonorSTUNServers(servers []string) []string {
 // DefaultDonorSTUNServers returns a fresh fallback pool that requires no DNS lookup.
 func DefaultDonorSTUNServers() []string {
 	return []string{
-		"stun:5.39.72.109:3478",
 		"stun:176.9.24.184:3478",
 		"stun:20.93.239.169:3478",
 		"stun:46.225.95.169:3478",
