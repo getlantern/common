@@ -134,6 +134,10 @@ type UnboundedConfig struct {
 	// keys as the Unbounded outbound's tuning option (broflake's clientcore.ParseWebRTCTuning).
 	// Clients ignore keys they don't recognize.
 	Tuning map[string]string `json:"tuning,omitempty"`
+	// Netstated is the URL the volunteer reports its connected consumers to, for the network
+	// visualizations (broflake's BroflakeOptions.Netstated), or "" not to report. The report
+	// includes each consumer's IP address.
+	Netstated string `json:"netstated,omitempty"`
 }
 
 // Equal reports whether both configurations have the same effective donor settings.
@@ -150,7 +154,7 @@ func (a *UnboundedConfig) Equal(b *UnboundedConfig) bool {
 		a.EgressAddr == b.EgressAddr && a.EgressEndpoint == b.EgressEndpoint &&
 		a.CTableSize == b.CTableSize && a.PTableSize == b.PTableSize &&
 		slices.Equal(NormalizeDonorSTUNServers(a.STUNServers), NormalizeDonorSTUNServers(b.STUNServers)) &&
-		maps.Equal(a.Tuning, b.Tuning)
+		maps.Equal(a.Tuning, b.Tuning) && a.Netstated == b.Netstated
 }
 
 // NormalizeDonorSTUNServers returns a fresh, sorted pool with surrounding whitespace, blank entries, and duplicates removed.
