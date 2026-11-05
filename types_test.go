@@ -307,6 +307,19 @@ func TestUnboundedTuningRoundTrip(t *testing.T) {
 	}
 }
 
+func TestUnboundedNetstatedRoundTrip(t *testing.T) {
+	original := UnboundedConfig{Netstated: "https://netstated.example/exec"}
+	encoded, err := json.Marshal(original)
+	assert.NoError(t, err)
+	assert.JSONEq(t, `{"netstated":"https://netstated.example/exec"}`, string(encoded))
+	var decoded UnboundedConfig
+	assert.NoError(t, json.Unmarshal(encoded, &decoded))
+	assert.True(t, original.Equal(&decoded))
+	encoded, err = json.Marshal(UnboundedConfig{})
+	assert.NoError(t, err)
+	assert.JSONEq(t, "{}", string(encoded))
+}
+
 func TestUnboundedConfigEqual(t *testing.T) {
 	var absent *UnboundedConfig
 	assert.True(t, absent.Equal(nil))
@@ -328,6 +341,7 @@ func TestUnboundedConfigEqual(t *testing.T) {
 		"discovery server":   func(c *UnboundedConfig) { c.DiscoverySrv += "changed" },
 		"discovery endpoint": func(c *UnboundedConfig) { c.DiscoveryEndpoint += "changed" },
 		"egress address":     func(c *UnboundedConfig) { c.EgressAddr += "changed" },
+		"netstated":          func(c *UnboundedConfig) { c.Netstated = "https://netstated.example/exec" },
 		"egress endpoint":    func(c *UnboundedConfig) { c.EgressEndpoint += "changed" },
 		"consumer table":     func(c *UnboundedConfig) { c.CTableSize++ },
 		"producer table":     func(c *UnboundedConfig) { c.PTableSize++ },
