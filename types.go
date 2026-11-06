@@ -1,6 +1,7 @@
 package common
 
 import (
+	"encoding/json"
 	"maps"
 	"slices"
 	"strings"
@@ -233,6 +234,13 @@ type ConfigResponse struct {
 	// token back in its selection-history report so the server can attribute
 	// the counters to a route without trusting any client-asserted identity.
 	BanditReportTokens map[string]string `json:"bandit_report_tokens,omitempty"`
+
+	// AutoSelectOptions, when set, is a JSON object of lantern-box
+	// MutableAutoSelectOutboundOptions fields the client applies to its
+	// auto-select group, such as probe_timeouts_ms, so the server can tune
+	// probing without a client release. It stays raw so a value the client
+	// can't use fails only its own decode, never the config response's.
+	AutoSelectOptions json.RawMessage `json:"auto_select_options,omitempty"`
 
 	Unbounded *UnboundedConfig `json:"unbounded,omitempty"`
 }
