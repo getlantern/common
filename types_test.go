@@ -377,3 +377,20 @@ func TestNormalizeDonorSTUNServers(t *testing.T) {
 		assert.NotContains(t, NormalizeDonorSTUNServers(empty), "changed")
 	}
 }
+
+func TestConfigResponseAutoSelectOptionsStayRaw(t *testing.T) {
+	// A value the client's auto-select group can't use must not fail the
+	// config response's own decode.
+	var resp ConfigResponse
+	err := json.Unmarshal([]byte(`{"auto_select_options": {"probe_timeouts_ms": {"hysteria2x": -1}, "switch_tolerance_percent": "x"}}`), &resp)
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.JSONEq(t, `{"probe_timeouts_ms": {"hysteria2x": -1}, "switch_tolerance_percent": "x"}`, string(resp.AutoSelectOptions))
+
+	out, err := json.Marshal(ConfigResponse{})
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.NotContains(t, string(out), "auto_select_options", "omitted when unset, so older clients see nothing new")
+}
