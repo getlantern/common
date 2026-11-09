@@ -81,6 +81,13 @@ const (
 	// would fail to load the whole outbound. Once a client has the option, new
 	// tuning keys need no further capability: an older client skips them.
 	CapabilityUnboundedTuning = "unbounded_tuning"
+
+	// CapabilityOutlineSmartDialer: the client's outline (proxyless) outbound
+	// accepts the server's smart-dialer config and retries a failed strategy
+	// search (lantern-box#433). Earlier clients reject every config with
+	// "unknown field dialeroptions", so the server sends the proxyless
+	// download_detour only to clients advertising this.
+	CapabilityOutlineSmartDialer = "outline_smart_dialer"
 )
 
 type ServerLocation struct {
