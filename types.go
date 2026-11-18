@@ -254,6 +254,10 @@ type ConfigResponse struct {
 	// Proxyless tunes the client's proxyless hedge, which under Smart
 	// Routing tries sites directly before the proxy. It is sent alongside
 	// Features["proxyless"], per country; nil leaves the hedge's defaults.
+	// It's typed, so a mistyped value would fail the whole response's
+	// decode: the server builds it from Go values (decoding any hand-written
+	// source into this type first, and dropping what fails) and sends it
+	// through Sanitize.
 	Proxyless *ProxylessConfig `json:"proxyless,omitempty"`
 }
 
@@ -267,6 +271,37 @@ type ProxylessConfig struct {
 	// telemetry may name. Every other site is reported as "other", and with
 	// none listed no site is reported at all.
 	TelemetrySites []string `json:"telemetry_sites,omitempty"`
+}
+
+// MaxProxylessTelemetrySites bounds TelemetrySites, which bounds the
+// telemetry's cardinality.
+const MaxProxylessTelemetrySites = 64
+
+// Sanitize returns c with only values the hedge accepts: an ExploreRate
+// outside (0, 1], or NaN, becomes 0, since the hedge refuses to build with
+// one outside [0, 1]; empty site names are dropped; and the list is cut to
+// MaxProxylessTelemetrySites. A nil c, or one left with nothing set,
+// returns nil.
+func (c *ProxylessConfig) Sanitize() *ProxylessConfig {
+	if c == nil {
+		return nil
+	}
+	out := &ProxylessConfig{}
+	if c.ExploreRate > 0 && c.ExploreRate <= 1 {
+		out.ExploreRate = c.ExploreRate
+	}
+	for _, site := range c.TelemetrySites {
+		if len(out.TelemetrySites) == MaxProxylessTelemetrySites {
+			break
+		}
+		if site != "" {
+			out.TelemetrySites = append(out.TelemetrySites, site)
+		}
+	}
+	if out.ExploreRate == 0 && len(out.TelemetrySites) == 0 {
+		return nil
+	}
+	return out
 }
 
 type ConfigRequest struct {

@@ -1,7 +1,9 @@
 package common
 
 import (
+	"fmt"
 	"log/slog"
+	"math"
 	"testing"
 
 	"github.com/sagernet/sing/common/json"
@@ -415,4 +417,19 @@ func TestProxylessConfigRoundTrip(t *testing.T) {
 	data, err = json.Marshal(ConfigResponse{})
 	assert.NoError(t, err)
 	assert.NotContains(t, string(data), "proxyless", "nil is omitted")
+}
+
+func TestProxylessConfigSanitize(t *testing.T) {
+	assert.Nil(t, (*ProxylessConfig)(nil).Sanitize())
+	for _, rate := range []float64{-0.1, 5, math.NaN(), math.Inf(1)} {
+		assert.Nil(t, (&ProxylessConfig{ExploreRate: rate}).Sanitize(), "rate %v", rate)
+	}
+	got := (&ProxylessConfig{ExploreRate: 1, TelemetrySites: []string{"", "youtube.com"}}).Sanitize()
+	assert.Equal(t, &ProxylessConfig{ExploreRate: 1, TelemetrySites: []string{"youtube.com"}}, got)
+
+	many := make([]string, MaxProxylessTelemetrySites+5)
+	for i := range many {
+		many[i] = fmt.Sprintf("site%d.example", i)
+	}
+	assert.Len(t, (&ProxylessConfig{TelemetrySites: many}).Sanitize().TelemetrySites, MaxProxylessTelemetrySites)
 }
