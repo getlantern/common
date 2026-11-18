@@ -1,7 +1,9 @@
 package common
 
 import (
+	"fmt"
 	"log/slog"
+	"math"
 	"testing"
 
 	"github.com/sagernet/sing/common/json"
@@ -393,4 +395,41 @@ func TestConfigResponseAutoSelectOptionsStayRaw(t *testing.T) {
 		return
 	}
 	assert.NotContains(t, string(out), "auto_select_options", "omitted when unset, so older clients see nothing new")
+}
+
+func TestProxylessConfigRoundTrip(t *testing.T) {
+	original := ConfigResponse{
+		Proxyless: &ProxylessConfig{
+			ExploreRate:    0.05,
+			TelemetrySites: []string{"youtube.com", "instagram.com"},
+		},
+	}
+	data, err := json.Marshal(original)
+	assert.NoError(t, err)
+	assert.Contains(t, string(data), `"proxyless"`)
+	assert.Contains(t, string(data), `"explore_rate"`)
+	assert.Contains(t, string(data), `"telemetry_sites"`)
+
+	var deserialized ConfigResponse
+	assert.NoError(t, json.Unmarshal(data, &deserialized))
+	assert.Equal(t, original.Proxyless, deserialized.Proxyless)
+
+	data, err = json.Marshal(ConfigResponse{})
+	assert.NoError(t, err)
+	assert.NotContains(t, string(data), "proxyless", "nil is omitted")
+}
+
+func TestProxylessConfigSanitize(t *testing.T) {
+	assert.Nil(t, (*ProxylessConfig)(nil).Sanitize())
+	for _, rate := range []float64{-0.1, 5, math.NaN(), math.Inf(1)} {
+		assert.Nil(t, (&ProxylessConfig{ExploreRate: rate}).Sanitize(), "rate %v", rate)
+	}
+	got := (&ProxylessConfig{ExploreRate: 1, TelemetrySites: []string{"", "youtube.com"}}).Sanitize()
+	assert.Equal(t, &ProxylessConfig{ExploreRate: 1, TelemetrySites: []string{"youtube.com"}}, got)
+
+	many := make([]string, MaxProxylessTelemetrySites+5)
+	for i := range many {
+		many[i] = fmt.Sprintf("site%d.example", i)
+	}
+	assert.Len(t, (&ProxylessConfig{TelemetrySites: many}).Sanitize().TelemetrySites, MaxProxylessTelemetrySites)
 }
