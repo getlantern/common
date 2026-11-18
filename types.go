@@ -250,6 +250,23 @@ type ConfigResponse struct {
 	AutoSelectOptions json.RawMessage `json:"auto_select_options,omitempty"`
 
 	Unbounded *UnboundedConfig `json:"unbounded,omitempty"`
+
+	// Proxyless tunes the client's proxyless hedge, which under Smart
+	// Routing tries sites directly before the proxy. It is sent alongside
+	// Features["proxyless"], per country; nil leaves the hedge's defaults.
+	Proxyless *ProxylessConfig `json:"proxyless,omitempty"`
+}
+
+// ProxylessConfig tunes how the client's proxyless hedge is measured.
+type ProxylessConfig struct {
+	// ExploreRate is the fraction, from 0 to 1, of connections the hedge
+	// could send directly that it sends through the proxy instead, so the
+	// two paths can be compared on the same sites.
+	ExploreRate float64 `json:"explore_rate,omitempty"`
+	// TelemetrySites are the registered domains (eTLD+1) the hedge's
+	// telemetry may name. Every other site is reported as "other", and with
+	// none listed no site is reported at all.
+	TelemetrySites []string `json:"telemetry_sites,omitempty"`
 }
 
 type ConfigRequest struct {

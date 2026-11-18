@@ -394,3 +394,25 @@ func TestConfigResponseAutoSelectOptionsStayRaw(t *testing.T) {
 	}
 	assert.NotContains(t, string(out), "auto_select_options", "omitted when unset, so older clients see nothing new")
 }
+
+func TestProxylessConfigRoundTrip(t *testing.T) {
+	original := ConfigResponse{
+		Proxyless: &ProxylessConfig{
+			ExploreRate:    0.05,
+			TelemetrySites: []string{"youtube.com", "instagram.com"},
+		},
+	}
+	data, err := json.Marshal(original)
+	assert.NoError(t, err)
+	assert.Contains(t, string(data), `"proxyless"`)
+	assert.Contains(t, string(data), `"explore_rate"`)
+	assert.Contains(t, string(data), `"telemetry_sites"`)
+
+	var deserialized ConfigResponse
+	assert.NoError(t, json.Unmarshal(data, &deserialized))
+	assert.Equal(t, original.Proxyless, deserialized.Proxyless)
+
+	data, err = json.Marshal(ConfigResponse{})
+	assert.NoError(t, err)
+	assert.NotContains(t, string(data), "proxyless", "nil is omitted")
+}
