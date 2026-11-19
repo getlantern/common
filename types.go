@@ -82,6 +82,14 @@ const (
 	// tuning keys need no further capability: an older client skips them.
 	CapabilityUnboundedTuning = "unbounded_tuning"
 
+	// CapabilityUnboundedDirectExit: the client's Unbounded outbound accepts a
+	// "direct_exit" option, which tells it to reach volunteers that exit
+	// traffic themselves rather than through the egress server
+	// (lantern-box#454). As with CapabilityUnboundedTuning, sing-box rejects
+	// unknown outbound fields, so the server sends direct_exit only to
+	// clients advertising this.
+	CapabilityUnboundedDirectExit = "unbounded_direct_exit"
+
 	// CapabilityOutlineSmartDialer: the client's outline (proxyless) outbound
 	// accepts the server's smart-dialer config and retries a failed strategy
 	// search (lantern-box#433). Earlier clients reject every config with
