@@ -90,6 +90,15 @@ const (
 	// clients advertising this.
 	CapabilityUnboundedDirectExit = "unbounded_direct_exit"
 
+	// CapabilityUnboundedDirectExitObfs: the client takes only obfuscated
+	// direct exits (Salamander-keyed Hysteria2, broflake's DirectExitObfs
+	// genesis), and its "direct_exit" option accepts a "pool_allowlist"
+	// rule set, so it sends a pool exit only the destinations that exit
+	// admits. The server sends that direct_exit only to clients advertising
+	// this. A client with just CapabilityUnboundedDirectExit can't use the
+	// obfuscated exits and would fail to load the new field.
+	CapabilityUnboundedDirectExitObfs = "unbounded_direct_exit_obfs"
+
 	// CapabilityOutlineSmartDialer: the client's outline (proxyless) outbound
 	// accepts the server's smart-dialer config and retries a failed strategy
 	// search (lantern-box#433). Earlier clients reject every config with
