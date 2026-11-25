@@ -402,6 +402,7 @@ func TestProxylessConfigRoundTrip(t *testing.T) {
 		Proxyless: &ProxylessConfig{
 			ExploreRate:    0.05,
 			TelemetrySites: []string{"youtube.com", "instagram.com"},
+			PerSiteSites:   []string{"youtube.com"},
 		},
 	}
 	data, err := json.Marshal(original)
@@ -409,6 +410,7 @@ func TestProxylessConfigRoundTrip(t *testing.T) {
 	assert.Contains(t, string(data), `"proxyless"`)
 	assert.Contains(t, string(data), `"explore_rate"`)
 	assert.Contains(t, string(data), `"telemetry_sites"`)
+	assert.Contains(t, string(data), `"per_site_sites"`)
 
 	var deserialized ConfigResponse
 	assert.NoError(t, json.Unmarshal(data, &deserialized))
@@ -432,4 +434,9 @@ func TestProxylessConfigSanitize(t *testing.T) {
 		many[i] = fmt.Sprintf("site%d.example", i)
 	}
 	assert.Len(t, (&ProxylessConfig{TelemetrySites: many}).Sanitize().TelemetrySites, MaxProxylessTelemetrySites)
+
+	got = (&ProxylessConfig{PerSiteSites: []string{"", "youtube.com"}}).Sanitize()
+	assert.Equal(t, &ProxylessConfig{PerSiteSites: []string{"youtube.com"}}, got, "a per-site list alone is kept")
+	assert.Len(t, (&ProxylessConfig{PerSiteSites: many}).Sanitize().PerSiteSites, MaxProxylessPerSiteSites)
+	assert.Nil(t, (&ProxylessConfig{PerSiteSites: []string{""}}).Sanitize(), "nothing left set")
 }

@@ -278,7 +278,7 @@ type ConfigResponse struct {
 	Proxyless *ProxylessConfig `json:"proxyless,omitempty"`
 }
 
-// ProxylessConfig tunes how the client's proxyless hedge is measured.
+// ProxylessConfig tunes the client's proxyless hedge and outbound.
 type ProxylessConfig struct {
 	// ExploreRate is the fraction, from 0 to 1, of connections the hedge
 	// could send directly that it sends through the proxy instead, so the
@@ -288,17 +288,25 @@ type ProxylessConfig struct {
 	// telemetry may name. Every other site is reported as "other", and with
 	// none listed no site is reported at all.
 	TelemetrySites []string `json:"telemetry_sites,omitempty"`
+	// PerSiteSites are the registered domains (eTLD+1) the proxyless outbound
+	// searches a DNS and TLS strategy for site by site. Every other site
+	// uses the outbound's one strategy, and with none listed no site gets a
+	// search of its own.
+	PerSiteSites []string `json:"per_site_sites,omitempty"`
 }
 
 // MaxProxylessTelemetrySites bounds TelemetrySites, which bounds the
 // telemetry's cardinality.
 const MaxProxylessTelemetrySites = 64
 
+// MaxProxylessPerSiteSites bounds PerSiteSites, which bounds the strategy
+// searches a client runs in the background.
+const MaxProxylessPerSiteSites = 64
+
 // Sanitize returns c with only values the hedge accepts: an ExploreRate
 // outside (0, 1], or NaN, becomes 0, since the hedge refuses to build with
-// one outside [0, 1]; empty site names are dropped; and the list is cut to
-// MaxProxylessTelemetrySites. A nil c, or one left with nothing set,
-// returns nil.
+// one outside [0, 1]; empty site names are dropped; and each site list is cut
+// to its Max. A nil c, or one left with nothing set, returns nil.
 func (c *ProxylessConfig) Sanitize() *ProxylessConfig {
 	if c == nil {
 		return nil
@@ -307,16 +315,25 @@ func (c *ProxylessConfig) Sanitize() *ProxylessConfig {
 	if c.ExploreRate > 0 && c.ExploreRate <= 1 {
 		out.ExploreRate = c.ExploreRate
 	}
-	for _, site := range c.TelemetrySites {
-		if len(out.TelemetrySites) == MaxProxylessTelemetrySites {
+	out.TelemetrySites = nonEmpty(c.TelemetrySites, MaxProxylessTelemetrySites)
+	out.PerSiteSites = nonEmpty(c.PerSiteSites, MaxProxylessPerSiteSites)
+	if out.ExploreRate == 0 && len(out.TelemetrySites) == 0 && len(out.PerSiteSites) == 0 {
+		return nil
+	}
+	return out
+}
+
+// nonEmpty returns the first max non-empty entries of list, or nil if it has
+// none.
+func nonEmpty(list []string, max int) []string {
+	var out []string
+	for _, s := range list {
+		if len(out) == max {
 			break
 		}
-		if site != "" {
-			out.TelemetrySites = append(out.TelemetrySites, site)
+		if s != "" {
+			out = append(out, s)
 		}
-	}
-	if out.ExploreRate == 0 && len(out.TelemetrySites) == 0 {
-		return nil
 	}
 	return out
 }
