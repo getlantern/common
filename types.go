@@ -307,9 +307,9 @@ const MaxProxylessPerSiteSites = 64
 // Sanitize returns c with only values the hedge and outbound accept: an
 // ExploreRate outside (0, 1], or NaN, becomes 0, since the hedge refuses to
 // build with one outside [0, 1]; empty site names are dropped, and per-site
-// names are also trimmed, lowercased and deduplicated; and each site list is
-// cut to its Max. A nil c, or one left with nothing set, returns nil, so a
-// config with only PerSiteSites set is kept.
+// names are also trimmed, lowercased, stripped of trailing dots and
+// deduplicated; and each site list is cut to its Max. A nil c, or one left
+// with nothing set, returns nil. PerSiteSites alone counts as set.
 func (c *ProxylessConfig) Sanitize() *ProxylessConfig {
 	if c == nil {
 		return nil
@@ -342,16 +342,16 @@ func nonEmpty(list []string, limit int) []string {
 }
 
 // siteNames returns the first limit distinct names in list, each trimmed,
-// lowercased and without a trailing dot, or nil if it has none, so
+// lowercased and without trailing dots, or nil if it has none, so
 // duplicates and stray spaces don't use up the limit.
 func siteNames(list []string, limit int) []string {
 	var out []string
-	seen := make(map[string]bool, len(list))
+	seen := make(map[string]bool, min(len(list), limit))
 	for _, s := range list {
 		if len(out) == limit {
 			break
 		}
-		s = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(s)), ".")
+		s = strings.TrimSpace(strings.TrimRight(strings.ToLower(strings.TrimSpace(s)), "."))
 		if s != "" && !seen[s] {
 			seen[s] = true
 			out = append(out, s)

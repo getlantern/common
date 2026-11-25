@@ -435,7 +435,7 @@ func TestProxylessConfigSanitize(t *testing.T) {
 	}
 	assert.Len(t, (&ProxylessConfig{TelemetrySites: many}).Sanitize().TelemetrySites, MaxProxylessTelemetrySites)
 
-	got = (&ProxylessConfig{PerSiteSites: []string{"", " YouTube.com. ", "youtube.com", "instagram.com"}}).Sanitize()
+	got = (&ProxylessConfig{PerSiteSites: []string{"", " YouTube.com. ", "youtube.com", "youtube.com..", "youtube.com .", "instagram.com"}}).Sanitize()
 	assert.Equal(t, &ProxylessConfig{PerSiteSites: []string{"youtube.com", "instagram.com"}}, got,
 		"a per-site list alone is kept, trimmed, lowercased and deduplicated")
 	assert.Nil(t, (&ProxylessConfig{PerSiteSites: []string{"", " "}}).Sanitize(), "nothing left set")
