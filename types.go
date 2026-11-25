@@ -269,8 +269,9 @@ type ConfigResponse struct {
 	Unbounded *UnboundedConfig `json:"unbounded,omitempty"`
 
 	// Proxyless tunes the client's proxyless hedge, which under Smart
-	// Routing tries sites directly before the proxy. It is sent alongside
-	// Features["proxyless"], per country; nil leaves the hedge's defaults.
+	// Routing tries sites directly before the proxy, and its proxyless
+	// outbound. It is sent alongside Features["proxyless"], per country; nil
+	// leaves their defaults.
 	// It's typed, so a mistyped value would fail the whole response's
 	// decode: the server builds it from Go values (decoding any hand-written
 	// source into this type first, and dropping what fails) and sends it
@@ -278,7 +279,7 @@ type ConfigResponse struct {
 	Proxyless *ProxylessConfig `json:"proxyless,omitempty"`
 }
 
-// ProxylessConfig tunes how the client's proxyless hedge is measured.
+// ProxylessConfig tunes the client's proxyless hedge and outbound.
 type ProxylessConfig struct {
 	// ExploreRate is the fraction, from 0 to 1, of connections the hedge
 	// could send directly that it sends through the proxy instead, so the
@@ -288,17 +289,27 @@ type ProxylessConfig struct {
 	// telemetry may name. Every other site is reported as "other", and with
 	// none listed no site is reported at all.
 	TelemetrySites []string `json:"telemetry_sites,omitempty"`
+	// PerSiteSites are the registered domains (eTLD+1) the proxyless outbound
+	// searches a DNS and TLS strategy for site by site. Every other site
+	// uses the outbound's one strategy, and with none listed no site gets a
+	// search of its own.
+	PerSiteSites []string `json:"per_site_sites,omitempty"`
 }
 
 // MaxProxylessTelemetrySites bounds TelemetrySites, which bounds the
 // telemetry's cardinality.
 const MaxProxylessTelemetrySites = 64
 
-// Sanitize returns c with only values the hedge accepts: an ExploreRate
-// outside (0, 1], or NaN, becomes 0, since the hedge refuses to build with
-// one outside [0, 1]; empty site names are dropped; and the list is cut to
-// MaxProxylessTelemetrySites. A nil c, or one left with nothing set,
-// returns nil.
+// MaxProxylessPerSiteSites bounds PerSiteSites, which bounds the strategy
+// searches a client runs in the background.
+const MaxProxylessPerSiteSites = 64
+
+// Sanitize returns c with only values the hedge and outbound accept: an
+// ExploreRate outside (0, 1], or NaN, becomes 0, since the hedge refuses to
+// build with one outside [0, 1]; empty site names are dropped, and per-site
+// names are also trimmed, lowercased, stripped of trailing dots and
+// deduplicated; and each site list is cut to its Max. A nil c, or one left
+// with nothing set, returns nil. PerSiteSites alone counts as set.
 func (c *ProxylessConfig) Sanitize() *ProxylessConfig {
 	if c == nil {
 		return nil
@@ -307,16 +318,44 @@ func (c *ProxylessConfig) Sanitize() *ProxylessConfig {
 	if c.ExploreRate > 0 && c.ExploreRate <= 1 {
 		out.ExploreRate = c.ExploreRate
 	}
-	for _, site := range c.TelemetrySites {
-		if len(out.TelemetrySites) == MaxProxylessTelemetrySites {
+	out.TelemetrySites = nonEmpty(c.TelemetrySites, MaxProxylessTelemetrySites)
+	out.PerSiteSites = siteNames(c.PerSiteSites, MaxProxylessPerSiteSites)
+	if out.ExploreRate == 0 && len(out.TelemetrySites) == 0 && len(out.PerSiteSites) == 0 {
+		return nil
+	}
+	return out
+}
+
+// nonEmpty returns the first limit non-empty entries of list, or nil if it
+// has none.
+func nonEmpty(list []string, limit int) []string {
+	var out []string
+	for _, s := range list {
+		if len(out) == limit {
 			break
 		}
-		if site != "" {
-			out.TelemetrySites = append(out.TelemetrySites, site)
+		if s != "" {
+			out = append(out, s)
 		}
 	}
-	if out.ExploreRate == 0 && len(out.TelemetrySites) == 0 {
-		return nil
+	return out
+}
+
+// siteNames returns the first limit distinct names in list, each trimmed,
+// lowercased and without trailing dots, or nil if it has none, so
+// duplicates and stray spaces don't use up the limit.
+func siteNames(list []string, limit int) []string {
+	var out []string
+	seen := make(map[string]bool, min(len(list), limit))
+	for _, s := range list {
+		if len(out) == limit {
+			break
+		}
+		s = strings.TrimSpace(strings.TrimRight(strings.ToLower(strings.TrimSpace(s)), "."))
+		if s != "" && !seen[s] {
+			seen[s] = true
+			out = append(out, s)
+		}
 	}
 	return out
 }

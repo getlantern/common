@@ -402,6 +402,7 @@ func TestProxylessConfigRoundTrip(t *testing.T) {
 		Proxyless: &ProxylessConfig{
 			ExploreRate:    0.05,
 			TelemetrySites: []string{"youtube.com", "instagram.com"},
+			PerSiteSites:   []string{"youtube.com"},
 		},
 	}
 	data, err := json.Marshal(original)
@@ -409,6 +410,7 @@ func TestProxylessConfigRoundTrip(t *testing.T) {
 	assert.Contains(t, string(data), `"proxyless"`)
 	assert.Contains(t, string(data), `"explore_rate"`)
 	assert.Contains(t, string(data), `"telemetry_sites"`)
+	assert.Contains(t, string(data), `"per_site_sites"`)
 
 	var deserialized ConfigResponse
 	assert.NoError(t, json.Unmarshal(data, &deserialized))
@@ -432,4 +434,19 @@ func TestProxylessConfigSanitize(t *testing.T) {
 		many[i] = fmt.Sprintf("site%d.example", i)
 	}
 	assert.Len(t, (&ProxylessConfig{TelemetrySites: many}).Sanitize().TelemetrySites, MaxProxylessTelemetrySites)
+
+	got = (&ProxylessConfig{PerSiteSites: []string{"", " YouTube.com. ", "youtube.com", "youtube.com..", "youtube.com .", "instagram.com"}}).Sanitize()
+	assert.Equal(t, &ProxylessConfig{PerSiteSites: []string{"youtube.com", "instagram.com"}}, got,
+		"a per-site list alone is kept, trimmed, lowercased and deduplicated")
+	assert.Nil(t, (&ProxylessConfig{PerSiteSites: []string{"", " "}}).Sanitize(), "nothing left set")
+	got = (&ProxylessConfig{ExploreRate: 5, PerSiteSites: []string{"a.example"}}).Sanitize()
+	assert.Equal(t, &ProxylessConfig{PerSiteSites: []string{"a.example"}}, got, "an invalid rate is dropped, the list kept")
+
+	sites := []string{"", "dup.example", "dup.example"}
+	for i := range MaxProxylessPerSiteSites + 5 {
+		sites = append(sites, fmt.Sprintf("site%d.example", i))
+	}
+	got = (&ProxylessConfig{PerSiteSites: sites}).Sanitize()
+	assert.Len(t, got.PerSiteSites, MaxProxylessPerSiteSites, "empties and duplicates don't count toward the cap")
+	assert.Equal(t, "site0.example", got.PerSiteSites[1])
 }
