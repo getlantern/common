@@ -269,8 +269,9 @@ type ConfigResponse struct {
 	Unbounded *UnboundedConfig `json:"unbounded,omitempty"`
 
 	// Proxyless tunes the client's proxyless hedge, which under Smart
-	// Routing tries sites directly before the proxy. It is sent alongside
-	// Features["proxyless"], per country; nil leaves the hedge's defaults.
+	// Routing tries sites directly before the proxy, and its proxyless
+	// outbound. It is sent alongside Features["proxyless"], per country; nil
+	// leaves their defaults.
 	// It's typed, so a mistyped value would fail the whole response's
 	// decode: the server builds it from Go values (decoding any hand-written
 	// source into this type first, and dropping what fails) and sends it
@@ -303,10 +304,12 @@ const MaxProxylessTelemetrySites = 64
 // searches a client runs in the background.
 const MaxProxylessPerSiteSites = 64
 
-// Sanitize returns c with only values the hedge accepts: an ExploreRate
-// outside (0, 1], or NaN, becomes 0, since the hedge refuses to build with
-// one outside [0, 1]; empty site names are dropped; and each site list is cut
-// to its Max. A nil c, or one left with nothing set, returns nil.
+// Sanitize returns c with only values the hedge and outbound accept: an
+// ExploreRate outside (0, 1], or NaN, becomes 0, since the hedge refuses to
+// build with one outside [0, 1]; empty site names are dropped, and per-site
+// names are also trimmed, lowercased and deduplicated; and each site list is
+// cut to its Max. A nil c, or one left with nothing set, returns nil, so a
+// config with only PerSiteSites set is kept.
 func (c *ProxylessConfig) Sanitize() *ProxylessConfig {
 	if c == nil {
 		return nil
@@ -316,22 +319,41 @@ func (c *ProxylessConfig) Sanitize() *ProxylessConfig {
 		out.ExploreRate = c.ExploreRate
 	}
 	out.TelemetrySites = nonEmpty(c.TelemetrySites, MaxProxylessTelemetrySites)
-	out.PerSiteSites = nonEmpty(c.PerSiteSites, MaxProxylessPerSiteSites)
+	out.PerSiteSites = siteNames(c.PerSiteSites, MaxProxylessPerSiteSites)
 	if out.ExploreRate == 0 && len(out.TelemetrySites) == 0 && len(out.PerSiteSites) == 0 {
 		return nil
 	}
 	return out
 }
 
-// nonEmpty returns the first max non-empty entries of list, or nil if it has
-// none.
-func nonEmpty(list []string, max int) []string {
+// nonEmpty returns the first limit non-empty entries of list, or nil if it
+// has none.
+func nonEmpty(list []string, limit int) []string {
 	var out []string
 	for _, s := range list {
-		if len(out) == max {
+		if len(out) == limit {
 			break
 		}
 		if s != "" {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// siteNames returns the first limit distinct names in list, each trimmed,
+// lowercased and without a trailing dot, or nil if it has none, so
+// duplicates and stray spaces don't use up the limit.
+func siteNames(list []string, limit int) []string {
+	var out []string
+	seen := make(map[string]bool, len(list))
+	for _, s := range list {
+		if len(out) == limit {
+			break
+		}
+		s = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(s)), ".")
+		if s != "" && !seen[s] {
+			seen[s] = true
 			out = append(out, s)
 		}
 	}
